@@ -10,7 +10,7 @@
     --bg:#0e1013; --surface:#15181d; --surface-2:#1d212a; --surface-3:#252a34;
     --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.14);
     --txt:#f2f3f6; --txt-2:#9ba3af; --txt-3:#6b7280;
-    --accent:#8b7cf6; --accent-strong:#7c6af2; --accent-tint:rgba(139,124,246,.14);
+    --accent:#4fa477; --accent-strong:#35855c; --accent-tint:rgba(79,164,119,.14);
     --ok:#7dc9a0; --warn:#e8c268;
     --r-lg:18px; --r:14px; --r-sm:10px;
     --sheetpx:0px; --chartpx:0px;
@@ -38,18 +38,6 @@
   .sec{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
     color:var(--txt-3);margin:18px 2px 8px}
 
-  .day{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);
-    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s}
-  .day:hover{background:var(--surface-3)}
-  .day.active{border-color:var(--accent);background:var(--surface-3)}
-  .day h3{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:8px}
-  .day h3 .dnum{color:var(--accent);font-variant-numeric:tabular-nums}
-  .day .dd{color:var(--txt-3);font-size:11px;margin-top:2px}
-  .day .st{font-size:12px;margin-top:6px;color:var(--txt-2);font-variant-numeric:tabular-nums}
-  .day .desc{font-size:12px;color:var(--txt-2);margin-top:8px;line-height:1.55;display:none}
-  .day.active .desc{display:block}
-  .day .sleep{font-size:12px;margin-top:7px;color:var(--warn);display:none;line-height:1.45}
-  .day.active .sleep{display:block}
 
   /* rows with switches */
   .row{display:flex;align-items:center;gap:10px;padding:9px 2px;min-height:40px}
@@ -150,13 +138,11 @@
   <h1>Přechod Bílých Karpat</h1>
   <div class="sub">Púchov → Myjava žel. st. · st 19. 8. – ne 23. 8. 2026 · hřebenovka Bílých Karpat</div>
   <div class="totals" id="totals"></div>
-  <div class="sec">Itinerář</div>
-  <div id="days"></div>
-  <div class="sec">Vrstvy</div>
-  <div id="layers"></div>
-  <div class="sec">Filtr fotek</div>
-  <div id="photofilter"></div>
+  <div class="sec">Filtry</div>
+  <div id="filters"></div>
   <div class="hint">Místa bez fotky bývají méně ověřená.</div>
+  <div class="sec">Body zájmu</div>
+  <div id="layers"></div>
   <div class="btns">
     <button class="btn" onclick="exportGPX(false)">Stáhnout GPX</button>
     <button class="btn sec2" onclick="exportGPX(true)">GPX + body</button>
@@ -175,7 +161,7 @@
 <script src="data.js"></script>
 <script>
 const MAPY_KEY = "R5Mv77riBsFzTqnOmEt6ay0pokzp4Pv2JwDm0ZEPCX8";
-const ACCENT = '#8b7cf6';
+const ACCENT = '#2e7a52';
 function cap(s){ s = String(s); return s.charAt(0).toUpperCase() + s.slice(1); }
 const isMobile = ()=> window.innerWidth <= 760;
 
@@ -208,17 +194,12 @@ if (MAPY_KEY){
 }
 
 // ---------- trasa ----------
-const dayCore = [], dayCasing = [];
-let bounds = null;
-TREK.days.forEach(d=>{
-  const casing = L.polyline(d.latlngs,{color:'#ffffff',weight:9,opacity:.92}).addTo(map);
-  const core   = L.polyline(d.latlngs,{color:ACCENT,weight:5,opacity:.95}).addTo(map);
-  core.bindPopup(`<div class="ppop"><b>Den ${d.n} · ${d.name}</b><br><span class="pcat">${d.day}</span><br>${String(d.dist).replace('.',',')} km · ↑${d.up} m · ↓${d.down} m · ~${String(d.hours).replace('.',',')} h chůze</div>`);
-  core.on('click',()=>selectDay(d.n,false));
-  casing.on('click',()=>selectDay(d.n,false));
-  dayCore.push(core); dayCasing.push(casing);
-  bounds = bounds ? bounds.extend(core.getBounds()) : core.getBounds();
-});
+const routeLatLngs = TREK.days.flatMap(d=>d.latlngs);
+const routeUp = TREK.days.reduce((s,d)=>s+d.up,0), routeDown = TREK.days.reduce((s,d)=>s+d.down,0);
+L.polyline(routeLatLngs,{color:'#ffffff',weight:9,opacity:.92}).addTo(map);
+const routeCore = L.polyline(routeLatLngs,{color:ACCENT,weight:5,opacity:.95}).addTo(map)
+  .bindPopup(`<div class="ppop"><b>Přechod Bílých Karpat</b><br><span class="pcat">Púchov → Myjava</span><br>${String(TREK.total).replace('.',',')} km · ↑${routeUp} m · ↓${routeDown} m</div>`);
+const bounds = routeCore.getBounds();
 function fitPad(){
   // mobil: mapa je pod bottom-sheetem, odsaď fit o výšku sheetu; desktop drobný okraj
   return isMobile() ? {paddingTopLeft:[16,16], paddingBottomRight:[16, sheetH + 16]} : {padding:[24,24]};
@@ -237,11 +218,10 @@ L.marker([TREK.days[0].latlngs[0][0],TREK.days[0].latlngs[0][1]],
  .addTo(map).bindPopup('<div class="ppop"><b>Start – Púchov, žel. st.</b><br><span class="pcat">středa ~12:00</span></div>');
 
 // ---------- POI ----------
-let activeDay = null;
 const CATS = {
   hut:    {label:'Útulny a chaty', on:true,  color:'#8a6d4f'},
-  shelter:{label:'Přístřešky (otevřené)', on:true, color:'#b8905f'},
-  lodging:{label:'Chaty / penziony (placené)', on:true, color:'#a3785f'},
+  shelter:{label:'Přístřešky', on:true, color:'#b8905f'},
+  lodging:{label:'Ubytování', on:true, color:'#a3785f'},
   water:  {label:'Voda (prameny, studánky)', on:true, color:'#5a8dd6'},
   food:   {label:'Hospody / restaurace', on:true, color:'#d97a4a'},
   shop:   {label:'Obchody', on:true, color:'#5aa06c'},
@@ -272,10 +252,10 @@ TREK.pois.forEach(p=>{
   html += `</div>`;
   poiMarkers.push({m: L.marker([p.lat,p.lon],{icon:ic}).bindPopup(html,{autoPanPadding:[24,70]}), cat: p.cat, km: p.km, photo: !!p.photo});
 });
-const PHOTO_F = {yes: true, no: true};
+const FILTER = {showAll: true, photoOnly: false};
 function syncPois(){
   poiMarkers.forEach(pm=>{
-    const want = CATS[pm.cat].on && (pm.photo ? PHOTO_F.yes : PHOTO_F.no);
+    const want = FILTER.showAll && CATS[pm.cat].on && (!FILTER.photoOnly || pm.photo);
     if(want && !poiLayer.hasLayer(pm.m)) poiLayer.addLayer(pm.m);
     if(!want && poiLayer.hasLayer(pm.m)) poiLayer.removeLayer(pm.m);
   });
@@ -288,49 +268,24 @@ function makeRow(parent, emoji, label, count, checked, onchange){
   row.querySelector('input').onchange = onchange;
   parent.appendChild(row);
 }
+const filtersDiv = document.getElementById('filters');
+makeRow(filtersDiv, '📍', 'Zobrazit body zájmu', TREK.pois.length, FILTER.showAll,
+  e=>{ FILTER.showAll = e.target.checked; syncPois(); });
+makeRow(filtersDiv, '📷', 'Jen místa s fotkou', TREK.pois.filter(p=>p.photo).length, FILTER.photoOnly,
+  e=>{ FILTER.photoOnly = e.target.checked; syncPois(); });
 const layersDiv = document.getElementById('layers');
 Object.entries(CATS).forEach(([c,cfg])=>{
   const n = TREK.pois.filter(p=>p.cat===c).length;
   makeRow(layersDiv, EMO[c], cfg.label, n, cfg.on, e=>{ cfg.on = e.target.checked; syncPois(); });
 });
-const pfDiv = document.getElementById('photofilter');
-[['yes','📷','S fotkou'],['no','▫️','Bez fotky']].forEach(([k,emo,label])=>{
-  const n = TREK.pois.filter(p=>(!!p.photo)===(k==='yes')).length;
-  makeRow(pfDiv, emo, label, n, true, e=>{ PHOTO_F[k] = e.target.checked; syncPois(); });
-});
 syncPois();
 
 // ---------- panel ----------
-const up = TREK.days.reduce((s,d)=>s+d.up,0), down = TREK.days.reduce((s,d)=>s+d.down,0);
 document.getElementById('totals').innerHTML =
   `<div class="tot"><b>${String(TREK.total).replace('.',',')}</b><span>km</span></div>
-   <div class="tot"><b>${up}</b><span>m ↑</span></div>
-   <div class="tot"><b>${down}</b><span>m ↓</span></div>
+   <div class="tot"><b>${routeUp}</b><span>m ↑</span></div>
+   <div class="tot"><b>${routeDown}</b><span>m ↓</span></div>
    <div class="tot"><b>4</b><span>noci</span></div>`;
-const daysDiv = document.getElementById('days');
-TREK.days.forEach(d=>{
-  const el = document.createElement('div');
-  el.className='day'; el.id='day'+d.n;
-  el.innerHTML = `<h3><span class="dnum">${d.n}</span> ${d.name}</h3><div class="dd">${d.day} · km ${d.kmFrom}–${d.kmTo}</div>
-    <div class="st">${String(d.dist).replace('.',',')} km · ↑${d.up} m · ↓${d.down} m · ~${String(d.hours).replace('.',',')} h</div>
-    <div class="desc">${d.desc}</div><div class="sleep">⛺ ${d.sleep}</div>`;
-  el.onclick = ()=>selectDay(d.n,true);
-  daysDiv.appendChild(el);
-});
-function selectDay(n, zoom){
-  activeDay = activeDay===n ? null : n;
-  document.querySelectorAll('.day').forEach(e=>e.classList.remove('active'));
-  dayCore.forEach((l,i)=>{
-    const hi = activeDay===i+1, dim = activeDay!==null && !hi;
-    l.setStyle({color: ACCENT, weight: hi ? 7 : 5, opacity: dim ? .3 : .95});
-    dayCasing[i].setStyle({opacity: dim ? .3 : .92});
-  });
-  if(activeDay){
-    document.getElementById('day'+n).classList.add('active');
-    if(zoom) map.fitBounds(dayCore[n-1].getBounds(), fitPad());
-  } else if(zoom) map.fitBounds(bounds, fitPad());
-  drawChart();
-}
 
 // ---------- výškový profil ----------
 const svg = document.getElementById('chart'), tip = document.getElementById('chtip');
@@ -348,15 +303,9 @@ function drawChart(){
   let s = `<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
     <stop offset="0" stop-color="${ACCENT}" stop-opacity=".45"/>
     <stop offset="1" stop-color="${ACCENT}" stop-opacity=".04"/></linearGradient></defs>`;
-  TREK.days.forEach(d=>{
-    const seg = P.filter(p=>p.km>=d.kmFrom-0.15 && p.km<=d.kmTo+0.15);
-    if(!seg.length) return;
-    const pts = seg.map(p=>`${X(p.km).toFixed(1)},${Y(p.ele).toFixed(1)}`).join(' ');
-    const dim = activeDay && activeDay!==d.n;
-    s += `<polygon points="${X(seg[0].km).toFixed(1)},${H} ${pts} ${X(seg[seg.length-1].km).toFixed(1)},${H}" fill="url(#ag)" opacity="${dim?0.25:1}"/>`;
-    s += `<polyline points="${pts}" fill="none" stroke="${ACCENT}" stroke-width="1.8" opacity="${dim?0.3:1}"/>`;
-    s += `<text x="${X((d.kmFrom+d.kmTo)/2)}" y="15" fill="${dim?'rgba(155,163,175,.4)':'#9ba3af'}" font-size="10" font-weight="600" text-anchor="middle">${d.n}</text>`;
-  });
+  const pts = P.map(p=>`${X(p.km).toFixed(1)},${Y(p.ele).toFixed(1)}`).join(' ');
+  s += `<polygon points="${X(P[0].km).toFixed(1)},${H} ${pts} ${X(kmMax).toFixed(1)},${H}" fill="url(#ag)"/>`;
+  s += `<polyline points="${pts}" fill="none" stroke="${ACCENT}" stroke-width="1.8"/>`;
   TREK.dayEnds.forEach(de=>{ if(de.km && de.name.startsWith('Nocleh') && de.km < kmMax - 0.5){
     s += `<line x1="${X(de.km)}" y1="20" x2="${X(de.km)}" y2="${H}" stroke="rgba(255,255,255,.14)" stroke-dasharray="3,4" stroke-width="1"/>`; }});
   s += `<line id="xline" y1="0" y2="${H}" stroke="rgba(255,255,255,.6)" stroke-width="1" style="display:none"/>`;
@@ -458,7 +407,7 @@ function exportGPX(withPois){
   const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   let g = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="bile-karpaty-trek" xmlns="http://www.topografix.com/GPX/1/1">\n`;
   TREK.dayEnds.forEach(de=>{ g += `<wpt lat="${de.lat}" lon="${de.lon}"><name>${esc(de.name)}</name><sym>Campground</sym></wpt>\n`; });
-  if(withPois) TREK.pois.filter(p=>CATS[p.cat].on && (p.photo ? PHOTO_F.yes : PHOTO_F.no)).forEach(p=>{
+  if(withPois) TREK.pois.filter(p=>FILTER.showAll && CATS[p.cat].on && (!FILTER.photoOnly || p.photo)).forEach(p=>{
     g += `<wpt lat="${p.lat}" lon="${p.lon}"><name>${esc(EMO[p.cat]+' '+cap(p.name||SUBNAMES[p.sub]||p.cat))}</name></wpt>\n`;
   });
   g += `<trk><name>Přechod Bílých Karpat: Púchov – Myjava</name>\n`;
