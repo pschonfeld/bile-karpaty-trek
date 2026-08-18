@@ -16,10 +16,10 @@ jen některé prohlížeče blokují lokální `data.js` – server je spolehliv
 | Den | Úsek | km | ↑ / ↓ | Nocleh |
 |---|---|---|---|---|
 | St 19. 8. | Púchov žst → hřeben pod Vršatcem | 13,4 | +655/−317 | bouda na hřebeni (km 13,4), záloha útulna „Domček“ (km 16,4) |
-| Čt 20. 8. | → útulna za Chladným vrchem (bradlá, Chmeľová, Vlárský průsmyk) | 30,4 | +1162/−1094 | útulna s ohništěm přímo na trase (km 43,8) |
-| Pá 21. 8. | → Veľký Lopeník (Starý Hrozenkov: obchod; Mikulčin vrch: restaurace) | 21,3 | +845/−584 | přístřešek pod rozhlednou (km 65,1) |
-| So 22. 8. | → přes Veľkou Javorinu (Holubyho chata) | 19,7 | +855/−882 | přístřešek přímo na trase (km 84,8) |
-| Ne 23. 8. | → Myjava, žel. st. | 9,4 | +67/−598 | krátký dojezd na vlak |
+| Čt 20. 8. | → útulna za Chladným vrchem (bradlá, Chmeľová, Vlárský průsmyk) | 30,4 | +1162/−1102 | útulna s ohništěm přímo na trase (km 43,8) |
+| Pá 21. 8. | → Veľký Lopeník (Starý Hrozenkov: obchod; Mikulčin vrch: restaurace) | 21,3 | +845/−562 | přístřešek pod rozhlednou (km 65,1) |
+| So 22. 8. | → přes Veľkou Javorinu (Holubyho chata) | 19,7 | +855/−1122 | přístřešek přímo na trase (km 84,8) |
+| Ne 23. 8. | → Myjava, žel. st. | 9,4 | +67/−293 | krátký dojezd na vlak |
 
 ## Data a limity
 - **Trasa**: vlastní GPX z plánovače Mapy.com (`data/import_gpx.py` ji převádí do pipeline) – v terénu se držte
@@ -27,7 +27,7 @@ jen některé prohlížeče blokují lokální `data.js` – server je spolehliv
 - **POI**: OpenStreetMap (Overpass), koridor ±1,2 km. Stav přístřešků a pitnost pramenů
   neověřena – berte jako pravděpodobná, ne garantovaná místa.
 - **API klíč Mapy.cz** je v `index.html` (`MAPY_KEY`) – klientský klíč, limit 250k dlaždic/měsíc.
-- **Fotky**: OSM tag `image`/`wikimedia_commons` + Wikimedia Commons geosearch (34 bodů).
+- **Fotky**: OSM tag `image`/`wikimedia_commons` + Wikimedia Commons geosearch + fotky z Mapy.com (celkem 73 bodů s fotkou).
 - **Hodnocení hospod**: veřejné API Mapy.cz hodnocení neposkytuje – v detailu bodu je odkaz
   na Mapy.com, kde je hodnocení i fotky.
 - `data/` obsahuje stahovací a build skripty (`fetch_route.py`, `fetch_pois.py`,
