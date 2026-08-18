@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Přechod Bílých Karpat · Púchov → Vrbovce</title>
+<title>Přechod Bílých Karpat · Púchov → Myjava</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root{--bg:#1e2126;--panel:#262a31;--card:#2e333b;--txt:#e8eaed;--mut:#9aa0a8;--acc:#4dabf7}
@@ -56,9 +56,9 @@
 </style>
 </head>
 <body>
-<div id="side">
+<div id="side" class="open">
   <h1>🥾 Přechod Bílých Karpat</h1>
-  <div class="sub">Púchov → Vrbovce žel. st. · st 19. 8. – ne 23. 8. 2026 · červená hřebenovka (E8)</div>
+  <div class="sub">Púchov → Myjava žel. st. · st 19. 8. – ne 23. 8. 2026 · červená hřebenovka (E8) · záložní výstup Vrbovce</div>
   <div class="totals" id="totals"></div>
   <div id="days"></div>
   <div class="layers" id="layers"></div>
@@ -80,8 +80,10 @@
 <script src="data.js"></script>
 <script>
 const MAPY_KEY = "R5Mv77riBsFzTqnOmEt6ay0pokzp4Pv2JwDm0ZEPCX8";
+function cap(s){ s = String(s); return s.charAt(0).toUpperCase() + s.slice(1); }
 
-const map = L.map('map', {zoomControl:true});
+const map = L.map('map', {zoomControl:false});
+L.control.zoom({position:'bottomright'}).addTo(map);
 const attr = MAPY_KEY ? '<a href="https://api.mapy.cz/copyright" target="_blank">© Seznam.cz a.s. a další</a>' : '© OpenStreetMap contributors';
 function mapyLayer(set){return L.tileLayer(`https://api.mapy.cz/v1/maptiles/${set}/256/{z}/{x}/{y}?apikey=${MAPY_KEY}`,{maxZoom:19,attribution:attr});}
 const bases = MAPY_KEY ? {
@@ -113,13 +115,17 @@ TREK.days.forEach(d=>{
   dayCore.push(core); dayCasing.push(casing);
   bounds = bounds ? bounds.extend(core.getBounds()) : core.getBounds();
 });
-function fitAll(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.05)); }
+function sidePad(){ // na mobilu překrývá rozbalené menu mapu zleva
+  const side = document.getElementById('side');
+  return (window.innerWidth <= 760 && side.classList.contains('open')) ? [Math.min(370, window.innerWidth*0.85), 0] : [0, 0];
+}
+function fitAll(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.05), {paddingTopLeft: sidePad()}); }
 fitAll();
 window.addEventListener('load', fitAll);
 
 // ---- noclehy / start / cíl ----
 TREK.dayEnds.forEach(de=>{
-  const emoji = de.name.startsWith('Cíl') ? '🚉' : '⛺';
+  const emoji = (de.name.startsWith('Cíl')||de.name.startsWith('Záložní')) ? '🚉' : '⛺';
   const ic = L.divIcon({className:'',html:`<div class="camp-pin">${emoji}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
   L.marker([de.lat,de.lon],{icon:ic,zIndexOffset:900}).addTo(map)
    .bindPopup(`<b>${de.name}</b><br>km ${String(de.km).replace('.',',')}`);
@@ -132,7 +138,7 @@ L.marker([TREK.days[0].latlngs[0][0],TREK.days[0].latlngs[0][1]],
 let activeDay = null;
 const CATS = {
   shelter:{label:'🛖 Přístřešky a útulny', on:true,  color:'#7b4b2a'},
-  lodging:{label:'🏠 Chaty / penziony (placené)', on:false, color:'#5d4037'},
+  lodging:{label:'🏠 Chaty / penziony (placené)', on:true, color:'#5d4037'},
   water:  {label:'💧 Voda (prameny, studánky)', on:true, color:'#1971c2'},
   food:   {label:'🍺 Hospody / restaurace', on:true, color:'#e8590c'},
   shop:   {label:'🛒 Obchody', on:true, color:'#2f9e44'},
@@ -149,9 +155,10 @@ const poiMarkers = [];
 TREK.pois.forEach(p=>{
   const ic = L.divIcon({className:'',html:`<div class="pin" style="border-color:${CATS[p.cat].color}">${EMO[p.cat]}</div>`,
                         iconSize:[26,26],iconAnchor:[13,24]});
-  const title = p.name || SUBNAMES[p.sub] || p.cat;
+  const title = cap(p.name || SUBNAMES[p.sub] || p.cat);
   const mapyUrl = `https://mapy.com/cs/turisticka?q=${encodeURIComponent(p.name || SUBNAMES[p.sub] || '')}&x=${p.lon}&y=${p.lat}&z=18`;
   let html = `<div class="ppop"><b>${EMO[p.cat]} ${title}</b><br><span class="pcat">${SUBNAMES[p.sub]||p.sub} · km ${p.km.toFixed(1).replace('.',',')} · ${p.off} m od trasy</span>`;
+  if(p.rating) html += `<br>⭐ ${p.rating.toFixed(1).replace('.',',')}${p.ratingCount!=null ? ` · ${p.ratingCount} hodnocení` : ''}`;
   if(p.drinking_water) html += `<br>pitná voda: ${p.drinking_water==='yes'?'ano':p.drinking_water==='no'?'ne':p.drinking_water}`;
   if(p.opening_hours) html += `<br><span class="hrs">🕐 ${p.opening_hours}</span>`;
   if(p.description||p.note) html += `<br><i>${p.description||p.note}</i>`;
@@ -162,19 +169,13 @@ TREK.pois.forEach(p=>{
   html += `</div>`;
   poiMarkers.push({m: L.marker([p.lat,p.lon],{icon:ic}).bindPopup(html), cat: p.cat, km: p.km});
 });
-const MIN_POI_ZOOM = 12;
 function syncPois(){
-  const zoomOk = map.getZoom() >= MIN_POI_ZOOM;
-  const d = activeDay ? TREK.days[activeDay-1] : null;
   poiMarkers.forEach(pm=>{
-    const inDay = d && pm.km >= d.kmFrom - 0.5 && pm.km <= d.kmTo + 0.5;
-    const want = CATS[pm.cat].on && (zoomOk || inDay);
+    const want = CATS[pm.cat].on;
     if(want && !poiLayer.hasLayer(pm.m)) poiLayer.addLayer(pm.m);
     if(!want && poiLayer.hasLayer(pm.m)) poiLayer.removeLayer(pm.m);
   });
-  document.getElementById('zoomhint').style.display = (zoomOk || d) ? 'none' : 'block';
 }
-map.on('zoomend', syncPois);
 const layersDiv = document.getElementById('layers');
 Object.entries(CATS).forEach(([c,cfg])=>{
   const n = TREK.pois.filter(p=>p.cat===c).length;
@@ -183,10 +184,6 @@ Object.entries(CATS).forEach(([c,cfg])=>{
   l.querySelector('input').onchange = e=>{ cfg.on = e.target.checked; syncPois(); };
   layersDiv.appendChild(l);
 });
-const zh = document.createElement('div');
-zh.id = 'zoomhint'; zh.className = 'note'; zh.style.color = '#ffd479';
-zh.textContent = 'ℹ️ Body zájmu se zobrazí po přiblížení mapy nebo po kliknutí na den.';
-layersDiv.appendChild(zh);
 syncPois();
 
 // ---- sidebar ----
@@ -216,8 +213,8 @@ function selectDay(n, zoom){
   });
   if(activeDay){
     document.getElementById('day'+n).classList.add('active');
-    if(zoom) map.fitBounds(dayCore[n-1].getBounds().pad(0.12));
-  } else if(zoom) map.fitBounds(bounds.pad(0.05));
+    if(zoom) map.fitBounds(dayCore[n-1].getBounds().pad(0.12), {paddingTopLeft: sidePad()});
+  } else if(zoom) map.fitBounds(bounds.pad(0.05), {paddingTopLeft: sidePad()});
   syncPois();
   drawChart();
 }
@@ -240,7 +237,7 @@ function drawChart(){
     s += `<polyline points="${pts}" fill="none" stroke="${d.color}" stroke-width="2" opacity="${dim?0.3:1}"/>`;
     s += `<text x="${X((d.kmFrom+d.kmTo)/2)}" y="14" fill="#aaa" font-size="10" text-anchor="middle">D${d.n}</text>`;
   });
-  TREK.dayEnds.forEach(de=>{ if(de.km && de.km < kmMax - 0.5){ s += `<line x1="${X(de.km)}" y1="0" x2="${X(de.km)}" y2="${H}" stroke="#888" stroke-dasharray="3,3" stroke-width="1"/>`; }});
+  TREK.dayEnds.forEach(de=>{ if(de.km && de.name.startsWith('Nocleh') && de.km < kmMax - 0.5){ s += `<line x1="${X(de.km)}" y1="0" x2="${X(de.km)}" y2="${H}" stroke="#888" stroke-dasharray="3,3" stroke-width="1"/>`; }});
   svg.innerHTML = s;
 }
 svg.parentElement.addEventListener('mousemove', ev=>{
@@ -262,7 +259,7 @@ function exportGPX(withPois){
   let g = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="bile-karpaty-trek" xmlns="http://www.topografix.com/GPX/1/1">\n`;
   TREK.dayEnds.forEach(de=>{ g += `<wpt lat="${de.lat}" lon="${de.lon}"><name>${esc(de.name)}</name><sym>Campground</sym></wpt>\n`; });
   if(withPois) TREK.pois.filter(p=>CATS[p.cat].on).forEach(p=>{
-    g += `<wpt lat="${p.lat}" lon="${p.lon}"><name>${esc(EMO[p.cat]+' '+(p.name||SUBNAMES[p.sub]||p.cat))}</name></wpt>\n`;
+    g += `<wpt lat="${p.lat}" lon="${p.lon}"><name>${esc(EMO[p.cat]+' '+cap(p.name||SUBNAMES[p.sub]||p.cat))}</name></wpt>\n`;
   });
   g += `<trk><name>Přechod Bílých Karpat: Púchov – Vrbovce</name>\n`;
   TREK.days.forEach(d=>{

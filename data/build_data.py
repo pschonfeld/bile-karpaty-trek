@@ -4,6 +4,10 @@ legs = json.load(open("data/route_legs.json"))
 pois = json.load(open("data/pois.json"))
 eles = json.load(open("data/elevation.json"))
 photos = json.load(open("data/photos.json"))
+try:
+    ratings = json.load(open("data/ratings.json"))
+except Exception:
+    ratings = {}
 
 coords = []
 for l in legs: coords += l["coords"]
@@ -25,22 +29,22 @@ assert len(samples) == len(eles), (len(samples), len(eles))
 profile = [{"km": round(s[2]/1000,3), "ele": e["ele"], "lat": round(s[1],6), "lon": round(s[0],6)}
            for s, e in zip(samples, eles)]
 
-BOUNDS = [0, 19.3, 45.1, 66.8, 83.0, cum[-1]/1000 + 1]
+BOUNDS = [0, 13.4, 45.1, 66.8, 87.3, cum[-1]/1000 + 1]
 META = [
-  {"n":1,"day":"Středa 19. 8.","name":"Púchov → Vršatec","color":"#e74c3c",
-   "desc":"Start v poledne z nádraží v Púchově. Výstup přes Lachovec na hřeben, výhledy na Považí, závěr pod Vršateckými bradly – nejfotogeničtější skály Bílých Karpat. Večeře v Chatě Vršatec.",
-   "sleep":"Přístřešky u Vršatce (km 18,8 / 19,3); uzavíratelná útulna „Domček“ už na km 16,4"},
-  {"n":2,"day":"Čtvrtek 20. 8.","name":"Vršatec → útulna za Chladným vrchem","color":"#e67e22",
-   "desc":"Hřebenovka po červené (Cesta hrdinov SNP / E8) kolem Vršateckých bradel, sestup do Vlárského průsmyku (železnice, hospoda, možnost doplnit zásoby v Sidonii). Odpoledne zpět na hřeben přes Chladný vrch (742 m) k útulně s ohništěm.",
+  {"n":1,"day":"Středa 19. 8.","name":"Púchov → hřeben pod Vršatcem","color":"#e74c3c",
+   "desc":"Start v poledne z nádraží v Púchově. Výstup přes Lachovec na hřeben, výhledy na Považí. Krátký rozjezdový den, večer klid na hřebeni.",
+   "sleep":"Přístřešek na hřebeni (km 13,4); záloha: útulna „Domček“ o 3 km dál (km 16,4)"},
+  {"n":2,"day":"Čtvrtek 20. 8.","name":"→ útulna za Chladným vrchem","color":"#e67e22",
+   "desc":"Ráno kolem útulny Domček k Vršateckým bradlům – nejfotogeničtější skály Bílých Karpat (Chata Vršatec: jídlo). Po červené (Cesta hrdinov SNP / E8) dlouhý sestup do Vlárského průsmyku (hospoda, obchod v Sidonii) a zpět na hřeben přes Chladný vrch. Nejdelší den přechodu.",
    "sleep":"Útulna s ohništěm přímo na trase (km 45,1)"},
   {"n":3,"day":"Pátek 21. 8.","name":"→ Veľký Lopeník","color":"#27ae60",
    "desc":"Pastevecké hřebeny moravských kopanic. V poledne Starý Hrozenkov (obchod – doplnění zásob, hospoda), odpoledne Mikulčin vrch s restaurací a výstup na Veľký Lopeník (911 m) s rozhlednou.",
    "sleep":"Přístřešek u Veľkého Lopeníka (km 66,8), rozhledna na dohled"},
   {"n":4,"day":"Sobota 22. 8.","name":"→ přes Veľkou Javorinu","color":"#2980b9",
-   "desc":"Sestup do sedla a dlouhý výstup na Veľkou Javorinu (970 m) – nejvyšší vrchol Bílých Karpat, pomník česko-slovenské vzájemnosti. Holubyho chata pod vrcholem (pozdní oběd / večeře), pak po hřebeni k přístřešku.",
-   "sleep":"Přístřešek na hřebeni za Javorinou (km 83,0)"},
-  {"n":5,"day":"Neděle 23. 8.","name":"Sestup na Vrbovce, žel. st.","color":"#8e44ad",
-   "desc":"Pohodový poslední úsek zvlněným hřebenem kopanic, sestup k železniční stanici Vrbovce (trať Veselí n. Moravou – Myjava). Stihnout polední/odpolední vlak.",
+   "desc":"Sestup do sedla a výstup na Veľkou Javorinu (970 m) – nejvyšší vrchol Bílých Karpat, pomník česko-slovenské vzájemnosti, jídlo v Holubyho chatě pod vrcholem. Dál po hřebeni; nocleh v přístřešku ~1,2 km pod hřebenem.",
+   "sleep":"Přístřešek pod hřebenem (km 87,3, odbočka 1,2 km); za deště raději přístřešek na km 83,0 přímo na trase"},
+  {"n":5,"day":"Neděle 23. 8.","name":"→ Myjava, žel. st.","color":"#8e44ad",
+   "desc":"Poslední den zvlněným hřebenem kopanic kolem Vrbovců (žel. st. na km ~96 = záložní výstup, kdyby došly síly) a dál na Myjavu. Vyrazit brzy, ať stihnete odpolední vlak.",
    "sleep":"—"},
 ]
 
@@ -65,19 +69,26 @@ for p in keep:
         if t.get(k): p[k] = t[k]
     ph = photos.get(p["id"])
     if ph: p["photo"] = ph["thumb"]; p["photoPage"] = ph.get("page","")
+    r = ratings.get(p["id"])
+    if r:
+        if r.get("rating") is not None: p["rating"] = r["rating"]
+        if r.get("count") is not None: p["ratingCount"] = r["count"]
+        if r.get("photo") and not p.get("photo"): p["photo"] = r["photo"]
 
 DAYEND = [
-  {"day":1,"km":19.3,"name":"Nocleh 1 – přístřešek Vršatec"},
-  {"day":2,"km":45.1,"name":"Nocleh 2 – útulna s ohništěm"},
-  {"day":3,"km":66.8,"name":"Nocleh 3 – přístřešek pod Lopeníkem"},
-  {"day":4,"km":83.0,"name":"Nocleh 4 – přístřešek za Javorinou"},
-  {"day":5,"km":round(cum[-1]/1000,1),"lat":48.8244,"lon":17.5163,"name":"Cíl – Vrbovce, žel. st."},
+  {"day":1,"km":13.4,"maxoff":250,"name":"Nocleh 1 – přístřešek na hřebeni"},
+  {"day":2,"km":45.1,"maxoff":250,"name":"Nocleh 2 – útulna s ohništěm"},
+  {"day":3,"km":66.8,"maxoff":250,"name":"Nocleh 3 – přístřešek pod Lopeníkem"},
+  {"day":4,"km":87.3,"maxoff":1300,"name":"Nocleh 4 – přístřešek pod hřebenem"},
+  {"day":5,"km":round(cum[-1]/1000,1),"lat":48.761498,"lon":17.571406,"name":"Cíl – Myjava, žel. st."},
+  {"day":5,"km":96.4,"lat":48.8244,"lon":17.5163,"name":"Záložní výstup – Vrbovce, žel. st."},
 ]
 for de in DAYEND:
     if "lat" not in de:
-        cands = [p for p in keep if p["cat"]=="shelter" and abs(p["km"]-de["km"]) < 0.6 and p["off"] < 250]
+        cands = [p for p in keep if p["cat"]=="shelter" and abs(p["km"]-de["km"]) < 0.6 and p["off"] < de["maxoff"]]
         best = min(cands, key=lambda p: (p["off"], abs(p["km"]-de["km"])))
         de["lat"], de["lon"] = best["lat"], best["lon"]
+    de.pop("maxoff", None)
 
 out = {"total": round(cum[-1]/1000,1), "days": days, "pois": keep, "profile": profile, "dayEnds": DAYEND}
 with open("data.js","w") as f:

@@ -12,6 +12,7 @@ WPTS = [
     ("Veľký Lopeník",     48.9167, 17.7827),
     ("Veľká Javorina",    48.8577, 17.6757),
     ("Vrbovce žst",       48.8244, 17.5163),
+    ("Myjava, železničná stanica", 48.7615, 17.5714),
 ]
 
 def route(a, b, rtype):
