@@ -9,7 +9,7 @@
   :root{
     --bg:#0e1013; --surface:#15181d; --surface-2:#1d212a; --surface-3:#252a34;
     --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.14);
-    --txt:#f2f3f6; --txt-2:#9ba3af; --txt-3:#6b7280;
+    --txt:#f2f3f6; --txt-2:#9ba3af; --txt-3:#7d8697;
     --accent:#4fa477; --accent-strong:#35855c; --accent-tint:rgba(79,164,119,.14);
     --ok:#7dc9a0; --warn:#e8c268;
     --r-lg:18px; --r:14px; --r-sm:10px;
@@ -40,7 +40,7 @@
 
 
   /* rows with switches */
-  .row{display:flex;align-items:center;gap:10px;padding:9px 2px;min-height:40px}
+  .row{display:flex;align-items:center;gap:10px;padding:10px 2px;min-height:44px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .row + .row{border-top:1px solid var(--line)}
   .row .ic{width:28px;height:28px;border-radius:8px;background:var(--surface-3);
     display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
@@ -54,12 +54,14 @@
     background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .18s}
   .sw input:checked + i{background:var(--accent-strong);border-color:transparent}
   .sw input:checked + i::after{transform:translateX(16px)}
+  .sw input:focus-visible + i{outline:2px solid var(--accent);outline-offset:2px}
+  .btn:focus-visible,#profbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   .hint{font-size:11px;color:var(--txt-3);margin:6px 2px 0;line-height:1.5}
 
   .btns{display:flex;gap:8px;margin-top:14px}
   .btn{flex:1;background:var(--accent-strong);color:#fff;font-weight:600;border:none;
-    border-radius:12px;padding:11px 12px;font-size:13px;cursor:pointer;transition:filter .15s}
+    border-radius:12px;padding:12px;min-height:44px;font-size:13px;cursor:pointer;transition:filter .15s;touch-action:manipulation}
   .btn:hover{filter:brightness(1.1)}
   .btn.sec2{background:var(--accent-tint);color:var(--accent)}
   .note{font-size:11px;color:var(--txt-3);margin:14px 2px calc(10px + env(safe-area-inset-bottom));line-height:1.55}
@@ -89,7 +91,7 @@
   .leaflet-popup-tip{background:var(--surface-2);border:1px solid var(--line-strong)}
   .leaflet-popup-content{font-size:12.5px;line-height:1.55;margin:12px 14px}
   .leaflet-popup-content b{font-size:13.5px;font-weight:600}
-  .leaflet-popup-close-button{color:var(--txt-3) !important;font-size:18px !important;padding:6px 8px 0 0 !important}
+  .leaflet-popup-close-button{color:var(--txt-3) !important;font-size:20px !important;width:34px !important;height:34px !important;padding:8px 10px 0 0 !important}
   .pcat{color:var(--txt-3);font-size:11px}
   .ppop a{color:var(--accent)}
   .ppop img{max-width:100%;max-height:160px;border-radius:10px;margin-top:8px;display:block;object-fit:cover}
@@ -122,7 +124,9 @@
       padding-top:4px;transition:height .22s ease-out}
     #side.dragging{transition:none}
     #grab{display:block;position:sticky;top:-4px;z-index:5;background:var(--surface);
-      margin:-4px -16px 6px;padding:10px 0 8px;touch-action:none;cursor:grab}
+      margin:-4px -16px 6px;padding:14px 0 10px;touch-action:none;cursor:grab}
+    #side.peek{overflow:hidden}
+    #side.dragging{user-select:none;-webkit-user-select:none}
     #grab::before{content:'';display:block;width:40px;height:4.5px;border-radius:3px;
       background:var(--line-strong);margin:0 auto}
     #chartbox{position:fixed;left:0;right:0;bottom:var(--sheetpx);z-index:1050;height:130px;
@@ -219,12 +223,12 @@ L.marker([TREK.days[0].latlngs[0][0],TREK.days[0].latlngs[0][1]],
 
 // ---------- POI ----------
 const CATS = {
-  hut:    {label:'Útulny a chaty', on:true,  color:'#8a6d4f'},
-  shelter:{label:'Přístřešky', on:true, color:'#b8905f'},
-  lodging:{label:'Ubytování', on:true, color:'#a3785f'},
-  water:  {label:'Voda (prameny, studánky)', on:true, color:'#5a8dd6'},
   food:   {label:'Hospody / restaurace', on:true, color:'#d97a4a'},
   shop:   {label:'Obchody', on:true, color:'#5aa06c'},
+  water:  {label:'Voda (prameny, studánky)', on:true, color:'#5a8dd6'},
+  shelter:{label:'Přístřešky', on:true, color:'#b8905f'},
+  hut:    {label:'Útulny a chaty', on:true,  color:'#8a6d4f'},
+  lodging:{label:'Ubytování', on:true, color:'#a3785f'},
 };
 const SUBNAMES = {shelter:'přístřešek',butcher:'řeznictví',picnic_shelter:'piknikový přístřešek',weather_shelter:'přístřešek proti počasí',basic_hut:'útulna (uzavíratelná)',
   building:'budova-přístřešek',gazebo:'altán',public_transport:'zastávková bouda',lean_to:'přístřešek',wilderness_hut:'útulna',
@@ -252,31 +256,40 @@ TREK.pois.forEach(p=>{
   html += `</div>`;
   poiMarkers.push({m: L.marker([p.lat,p.lon],{icon:ic}).bindPopup(html,{autoPanPadding:[24,70]}), cat: p.cat, km: p.km, photo: !!p.photo});
 });
-const FILTER = {showAll: true, photoOnly: false};
+const FILTER = {photoOnly: false};
 function syncPois(){
   poiMarkers.forEach(pm=>{
-    const want = FILTER.showAll && CATS[pm.cat].on && (!FILTER.photoOnly || pm.photo);
+    const want = CATS[pm.cat].on && (!FILTER.photoOnly || pm.photo);
     if(want && !poiLayer.hasLayer(pm.m)) poiLayer.addLayer(pm.m);
     if(!want && poiLayer.hasLayer(pm.m)) poiLayer.removeLayer(pm.m);
   });
 }
 function makeRow(parent, emoji, label, count, checked, onchange){
-  const row = document.createElement('div'); row.className = 'row';
+  const row = document.createElement('label'); row.className = 'row';
   row.innerHTML = `<div class="ic">${emoji}</div><div class="lbl">${label}</div>
     <div class="cnt">${count}</div>
-    <label class="sw"><input type="checkbox" ${checked?'checked':''}><i></i></label>`;
+    <span class="sw"><input type="checkbox" ${checked?'checked':''}><i></i></span>`;
   row.querySelector('input').onchange = onchange;
   parent.appendChild(row);
+  return row.querySelector('input');
 }
 const filtersDiv = document.getElementById('filters');
-makeRow(filtersDiv, '📍', 'Zobrazit body zájmu', TREK.pois.length, FILTER.showAll,
-  e=>{ FILTER.showAll = e.target.checked; syncPois(); });
+const catInputs = {};
+const masterInput = makeRow(filtersDiv, '📍', 'Zobrazit body zájmu', TREK.pois.length, true,
+  e=>{ // reset vše / nic
+    Object.entries(CATS).forEach(([c,cfg])=>{ cfg.on = e.target.checked; catInputs[c].checked = e.target.checked; });
+    syncPois();
+  });
 makeRow(filtersDiv, '📷', 'Jen místa s fotkou', TREK.pois.filter(p=>p.photo).length, FILTER.photoOnly,
   e=>{ FILTER.photoOnly = e.target.checked; syncPois(); });
 const layersDiv = document.getElementById('layers');
 Object.entries(CATS).forEach(([c,cfg])=>{
   const n = TREK.pois.filter(p=>p.cat===c).length;
-  makeRow(layersDiv, EMO[c], cfg.label, n, cfg.on, e=>{ cfg.on = e.target.checked; syncPois(); });
+  catInputs[c] = makeRow(layersDiv, EMO[c], cfg.label, n, cfg.on, e=>{
+    cfg.on = e.target.checked;
+    masterInput.checked = Object.values(CATS).some(x=>x.on);
+    syncPois();
+  });
 });
 syncPois();
 
@@ -353,11 +366,13 @@ map.on('popupopen', e=>{
 // ---------- bottom sheet (mobil) ----------
 const sheet = document.getElementById('side');
 let sheetH = 0;
-function snapPoints(){ const H = window.innerHeight; return [96, Math.round(H*0.42), Math.round(H*0.92)]; }
+function snapPoints(){ const H = window.innerHeight; return [PEEK, Math.round(H*0.42), Math.round(H*0.92)]; }
+const PEEK = 112;
 function setSheet(px, animate){
   const H = window.innerHeight;
-  sheetH = Math.max(96, Math.min(px, Math.round(H*0.92)));
+  sheetH = Math.max(PEEK, Math.min(px, Math.round(H*0.92)));
   sheet.classList.toggle('dragging', !animate);
+  sheet.classList.toggle('peek', sheetH <= PEEK + 8);
   sheet.style.height = sheetH + 'px';
   document.documentElement.style.setProperty('--sheetpx', sheetH + 'px');
 }
@@ -378,23 +393,37 @@ function syncSheet(){
 (function(){
   const grab = document.getElementById('grab');
   let startY = 0, startH = 0, dragging = false;
-  grab.addEventListener('pointerdown', ev=>{
-    dragging = true; startY = ev.clientY; startH = sheetH;
-    grab.setPointerCapture(ev.pointerId);
-  });
-  grab.addEventListener('pointermove', ev=>{
-    if(!dragging) return;
-    setSheet(startH + (startY - ev.clientY), false);
-  });
-  const end = ()=>{
+  const endDrag = ()=>{
     if(!dragging) return;
     dragging = false;
     const best = snapPoints().reduce((a,b)=>Math.abs(b-sheetH)<Math.abs(a-sheetH)?b:a);
     setSheet(best, true);
     setTimeout(()=>map.invalidateSize(), 240);
   };
-  grab.addEventListener('pointerup', end);
-  grab.addEventListener('pointercancel', end);
+  // úchyt: drag vždy
+  grab.addEventListener('pointerdown', ev=>{
+    dragging = true; startY = ev.clientY; startH = sheetH;
+    grab.setPointerCapture(ev.pointerId);
+  });
+  grab.addEventListener('pointermove', ev=>{ if(dragging) setSheet(startH + (startY - ev.clientY), false); });
+  grab.addEventListener('pointerup', endDrag);
+  grab.addEventListener('pointercancel', endDrag);
+  // v peeku táhne celé tělo sheetu (tap s prahem 8 px projde jako klik)
+  let armed = false;
+  sheet.addEventListener('pointerdown', ev=>{
+    if(!isMobile() || !sheet.classList.contains('peek') || ev.target.closest('#grab')) return;
+    armed = true; startY = ev.clientY; startH = sheetH;
+  });
+  sheet.addEventListener('pointermove', ev=>{
+    if(!armed && !dragging) return;
+    if(armed && Math.abs(startY - ev.clientY) > 8){
+      armed = false; dragging = true;
+      try{ sheet.setPointerCapture(ev.pointerId); }catch(_){}
+    }
+    if(dragging && !ev.target.closest('#grab')) setSheet(startH + (startY - ev.clientY), false);
+  });
+  sheet.addEventListener('pointerup', ev=>{ armed = false; if(!ev.target.closest('#grab')) endDrag(); });
+  sheet.addEventListener('pointercancel', ev=>{ armed = false; if(!ev.target.closest('#grab')) endDrag(); });
 })();
 
 // ---------- init ----------
@@ -407,7 +436,7 @@ function exportGPX(withPois){
   const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   let g = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="bile-karpaty-trek" xmlns="http://www.topografix.com/GPX/1/1">\n`;
   TREK.dayEnds.forEach(de=>{ g += `<wpt lat="${de.lat}" lon="${de.lon}"><name>${esc(de.name)}</name><sym>Campground</sym></wpt>\n`; });
-  if(withPois) TREK.pois.filter(p=>FILTER.showAll && CATS[p.cat].on && (!FILTER.photoOnly || p.photo)).forEach(p=>{
+  if(withPois) TREK.pois.filter(p=>CATS[p.cat].on && (!FILTER.photoOnly || p.photo)).forEach(p=>{
     g += `<wpt lat="${p.lat}" lon="${p.lon}"><name>${esc(EMO[p.cat]+' '+cap(p.name||SUBNAMES[p.sub]||p.cat))}</name></wpt>\n`;
   });
   g += `<trk><name>Přechod Bílých Karpat: Púchov – Myjava</name>\n`;

@@ -1,39 +1,32 @@
 # Přechod Bílých Karpat · Púchov → Myjava žel. st.
 
-Interaktivní plánovač 4,5denního přechodu po červené hřebenovce (Cesta hrdinov SNP / E8),
-st 19. 8. – ne 23. 8. 2026. Celkem **94,2 km**, ↑3584 m / ↓3396 m. Trasa: vlastní plán z Mapy.com
-(https://mapy.com/s/jogojevesa, GPX v `data/route_user.gpx`).
+Interaktivní mapa přechodu po hřebenovce Bílých Karpat, st 19. 8. – ne 23. 8. 2026.
+Celkem **95,6 km**, ↑3651 m / ↓3556 m.
+
+Trasa vychází z plánu na Mapy.com (https://mapy.com/s/jogojevesa): Púchov žst →
+Chmeľová → Vršatské Podhradie → (červená hřebenovka přes Vlárský průsmyk, Mikulčin
+vrch, Veľký Lopeník a Veľkou Javorinu) → Myjava žel. st. Geometrie je generovaná
+routingem Mapy.cz (profil `foot_hiking`) přes tyto body — drží se značených tras.
 
 ## Spuštění
-Aplikace je statická – stačí naservírovat adresář:
+Statická aplikace:
 ```
 python3 -m http.server 8741 --directory .
 ```
-a otevřít http://localhost:8741. (Otevření `index.html` přímo souborem funguje také,
-jen některé prohlížeče blokují lokální `data.js` – server je spolehlivější.)
-
-## Etapy
-| Den | Úsek | km | ↑ / ↓ | Nocleh |
-|---|---|---|---|---|
-| St 19. 8. | Púchov žst → hřeben pod Vršatcem | 13,4 | +655/−317 | bouda na hřebeni (km 13,4), záloha útulna „Domček“ (km 16,4) |
-| Čt 20. 8. | → útulna za Chladným vrchem (bradlá, Chmeľová, Vlárský průsmyk) | 30,4 | +1162/−1102 | útulna s ohništěm přímo na trase (km 43,8) |
-| Pá 21. 8. | → Veľký Lopeník (Starý Hrozenkov: obchod; Mikulčin vrch: restaurace) | 21,3 | +845/−562 | přístřešek pod rozhlednou (km 65,1) |
-| So 22. 8. | → přes Veľkou Javorinu (Holubyho chata) | 19,7 | +855/−1122 | přístřešek přímo na trase (km 84,8) |
-| Ne 23. 8. | → Myjava, žel. st. | 9,4 | +67/−293 | krátký dojezd na vlak |
+a otevřít http://localhost:8741. Nasazeno na GitHub Pages (push do `main`).
 
 ## Data a limity
-- **Trasa**: vlastní GPX z plánovače Mapy.com (`data/import_gpx.py` ji převádí do pipeline) – v terénu se držte
-  červené značky, routing se od ní může místy drobně lišit.
-- **POI**: OpenStreetMap (Overpass), koridor ±1,2 km. Stav přístřešků a pitnost pramenů
-  neověřena – berte jako pravděpodobná, ne garantovaná místa.
-- **API klíč Mapy.cz** je v `index.html` (`MAPY_KEY`) – klientský klíč, limit 250k dlaždic/měsíc.
-- **Fotky**: OSM tag `image`/`wikimedia_commons` + Wikimedia Commons geosearch + fotky z Mapy.com (celkem 73 bodů s fotkou).
-- **Hodnocení hospod**: veřejné API Mapy.cz hodnocení neposkytuje – v detailu bodu je odkaz
-  na Mapy.com, kde je hodnocení i fotky.
-- `data/` obsahuje stahovací a build skripty (`fetch_route.py`, `fetch_pois.py`,
-  `fetch_elev.py`, `fetch_photos.py`, `process.py`, `build_data.py`) – po úpravě trasy spusťte v tomto pořadí.
+- **Trasa**: Mapy.cz routing API přes body plánu (viz `data/fetch_route.py`).
+- **Body zájmu**: OpenStreetMap (Overpass), koridor ±1,2 km — hospody, obchody,
+  voda, přístřešky, útulny, ubytování. Pitnost pramenů a stav přístřešků neověřeny.
+- **Hodnocení a otvíračky**: neoficiální endpointy mapy.com (viz
+  `data/ratings_report.md`) — mohou se kdykoli rozbít, aplikace na nich neběží.
+- **Fotky**: OSM tagy, Wikimedia Commons a Mapy.com (73 bodů s fotkou).
+- **API klíč Mapy.cz** je v `index.html` (`MAPY_KEY`), omezený na doménu.
+- Pipeline v `data/`: `fetch_route` (nebo `import_gpx` pro vlastní GPX) →
+  `fetch_pois` → `fetch_elev` → `process` → `fetch_photos` → `fetch_ratings` →
+  `build_data`.
 
 ## Než vyrazíte
-- Exportujte **GPX** tlačítkem v aplikaci a nahrajte do mobilu/hodinek.
-- V mobilní aplikaci Mapy.cz si stáhněte **offline mapu** Bílých Karpat – na hřebeni je slabý signál.
-- Ověřte jízdní řád vlaku z Vrbovců na nedělní odpoledne.
+- Stáhnout **GPX** tlačítkem v aplikaci (volitelně i s viditelnými body zájmu).
+- V mobilní aplikaci Mapy.cz **offline mapu** Bílých Karpat — na hřebeni je slabý signál.

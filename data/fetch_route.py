@@ -4,15 +4,11 @@ KEY = "R5Mv77riBsFzTqnOmEt6ay0pokzp4Pv2JwDm0ZEPCX8"
 
 # key waypoints along the ridge (lat, lon)
 WPTS = [
-    ("Púchov žst",        49.1132, 18.3276),
-    ("Vršatec",           49.0660, 18.1509),
-    ("Vlárský průsmyk",   49.0331, 18.0530),
-    ("Chladný vrch",      49.0225, 18.0117),
-    ("Mikulčin vrch",     48.9452, 17.8087),
-    ("Veľký Lopeník",     48.9167, 17.7827),
-    ("Veľká Javorina",    48.8577, 17.6757),
-    ("Vrbovce žst",       48.8244, 17.5163),
-    ("Myjava, železničná stanica", 48.7615, 17.5714),
+    ("Púchov žst",          49.113163, 18.327635),
+    ("Chmeľová",            49.073868, 18.154311),
+    ("Vršatské Podhradie",  49.064913, 18.153845),
+    ("Veľká Javorina",      48.8577,   17.6757),
+    ("Myjava",              48.763770, 17.570920),
 ]
 
 def route(a, b, rtype):
