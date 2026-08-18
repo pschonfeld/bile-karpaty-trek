@@ -168,7 +168,7 @@ TREK.pois.forEach(p=>{
   if(p.opening_hours) html += `<br><span class="hrs">🕐 ${p.opening_hours}</span>`;
   if(p.description||p.note) html += `<br><i>${p.description||p.note}</i>`;
   if(p.phone) html += `<br>📞 ${p.phone}`;
-  if(p.photo) html += `<a href="${p.photoPage||p.photo}" target="_blank"><img src="${p.photo}" loading="lazy" alt=""></a>`;
+  if(p.photo) html += `<a href="${p.photoPage||p.photo}" target="_blank"><img src="${p.photo}" loading="lazy" alt="" onerror="this.parentElement.style.display='none'"></a>`;
   html += `<br><a class="mlink" href="${mapyUrl}" target="_blank">${p.cat==='food'?'⭐ hodnocení a fotky na Mapy.com':'🔍 na Mapy.com'}</a>`;
   if(p.website) html += ` · <a class="mlink" href="${p.website}" target="_blank">web</a>`;
   html += `</div>`;

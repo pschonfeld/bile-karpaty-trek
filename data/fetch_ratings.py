@@ -60,7 +60,7 @@ UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit
 SLEEP_S = 0.3
 MATCH_RADIUS_M = 150
 MIN_NAME_SIM = 0.45
-PHOTO_SIZE = 480
+PHOTO_SIZE = 640
 
 
 # ------------------------------------------------------------------------
@@ -303,7 +303,7 @@ def photo_url(poi_detail_obj):
     tmpl = urls.get("default") or urls.get("1x1") or urls.get("16x9")
     if not tmpl:
         return None
-    return tmpl.replace("{width}", str(PHOTO_SIZE)).replace("{height}", str(PHOTO_SIZE))
+    return tmpl.replace("{width}", str(PHOTO_SIZE)).replace("{height}", str(PHOTO_SIZE * 3 // 4)).replace(",1", ",3")
 
 
 # ------------------------------------------------------------------------
