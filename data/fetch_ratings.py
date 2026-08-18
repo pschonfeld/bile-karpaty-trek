@@ -294,6 +294,53 @@ def best_match(poi):
     return best
 
 
+CZ_DAYS = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"]
+
+def _fmt_time(t):
+    return f"{t[0]}:{t[1]:02d}"
+
+def extract_hours(detail):
+    """Opening hours: prefer the OSM string, else format mapy.com's seasons struct."""
+    ext = detail.get("extend") or {}
+    osm_h = (ext.get("osm") or {}).get("opening_hours")
+    if osm_h:
+        return str(osm_h)
+    seasons = (ext.get("opening") or {}).get("seasons") or []
+    for season in seasons:
+        days = season.get("days") or {}
+        if not days:
+            continue
+        # day key: "1"=Po ... "7"/"0"=Ne
+        per_day = {}
+        for k, v in days.items():
+            d = int(k)
+            d = 7 if d == 0 else d
+            ivs = v.get("interval") or []
+            txt = ", ".join(f"{_fmt_time(a)}–{_fmt_time(b)}" for a, b in ivs)
+            if txt:
+                per_day[d] = txt
+        if not per_day:
+            continue
+        # group consecutive days with identical hours
+        parts, run = [], []
+        for d in range(1, 8):
+            if d in per_day and run and per_day[d] == per_day[run[-1]] and d == run[-1] + 1:
+                run.append(d)
+            else:
+                if run:
+                    a, b = run[0], run[-1]
+                    lbl = CZ_DAYS[a-1] if a == b else f"{CZ_DAYS[a-1]}–{CZ_DAYS[b-1]}"
+                    parts.append(f"{lbl} {per_day[a]}")
+                run = [d] if d in per_day else []
+        if run:
+            a, b = run[0], run[-1]
+            lbl = CZ_DAYS[a-1] if a == b else f"{CZ_DAYS[a-1]}–{CZ_DAYS[b-1]}"
+            parts.append(f"{lbl} {per_day[a]}")
+        if parts:
+            return "; ".join(parts)
+    return None
+
+
 def photo_url(poi_detail_obj):
     gallery = poi_detail_obj.get("gallery") or []
     if not gallery:
@@ -334,21 +381,24 @@ def main():
                   f"({dist:.0f}m, sim={sim:.2f}): detail fetch failed", file=sys.stderr)
             continue
         review = detail.get("review") or {}
-        if not review.get("use_rating") or review.get("review_rating_stars") in (None, 0.0):
-            print(f"[{i+1}/{len(targets)}] {poi['name']!r} -> {cand_name!r}: no rating on mapy.com", file=sys.stderr)
-            continue
-        entry = {
-            "rating": round(float(review["review_rating_stars"]), 1),
-            "count": int(review.get("total") or 0),
-        }
+        entry = {}
+        if review.get("use_rating") and review.get("review_rating_stars") not in (None, 0.0):
+            entry["rating"] = round(float(review["review_rating_stars"]), 1)
+            entry["count"] = int(review.get("total") or 0)
+            rated += 1
         photo = photo_url(detail)
         if photo:
             entry["photo"] = photo
+        hours = extract_hours(detail)
+        if hours:
+            entry["hours"] = hours
+        if not entry:
+            print(f"[{i+1}/{len(targets)}] {poi['name']!r} -> {cand_name!r}: nothing usable", file=sys.stderr)
+            continue
         ratings[poi["id"]] = entry
-        rated += 1
-        print(f"[{i+1}/{len(targets)}] {poi['name']!r} -> {cand_name!r} "
-              f"({dist:.0f}m, sim={sim:.2f}): {entry['rating']}★ ({entry['count']} reviews)"
-              f"{' +photo' if photo else ''}", file=sys.stderr)
+        print(f"[{i+1}/{len(targets)}] {poi['name']!r} -> {cand_name!r} ({dist:.0f}m): "
+              f"{str(entry.get('rating'))+'★ ('+str(entry.get('count'))+')' if 'rating' in entry else '-'}"
+              f"{' +photo' if 'photo' in entry else ''}{' +hours' if 'hours' in entry else ''}", file=sys.stderr)
 
     json.dump(ratings, open("data/ratings.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"\nDone. matched={matched}/{len(targets)} rated={rated}/{len(targets)}", file=sys.stderr)

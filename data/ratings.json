@@ -1,38 +1,105 @@
 {
+ "node/411898351": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gQ_7/GdZbRU.jpeg?fl=res,640,480,3"
+ },
+ "node/473481358": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QP_BK/LOUcV2.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 06:30-19:00; Sa-Su 15:00-19:00"
+ },
  "node/1875860860": {
   "rating": 4.4,
   "count": 106,
   "photo": "https://d48-a.sdn.cz/d_48/c_img_m3_A/kcuj4damOBiLh4b6Bgg07j/dd33.jpeg?fl=res,640,480,3"
  },
+ "node/2141308752": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QP_BA/xfVBKzq.jpeg?fl=rot,380,0%7Cres,640,480,3"
+ },
  "node/2141308759": {
   "rating": 4.9,
   "count": 4,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_QR_g/XuXP7W.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QR_g/XuXP7W.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 10:00-01:00, Sa 11:00-01:00, Su 11:00-23:00"
+ },
+ "node/2158107099": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gV_0/aUJa6p.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Su 08:00-23:00"
+ },
+ "node/2172106778": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gT_1/QyXEbl.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 09:30-12:00; Su-Su 15:00-24:00"
+ },
+ "node/2384444498": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_H_V/9GHBSHv.jpeg?fl=res,640,480,3"
  },
  "node/2402258488": {
   "rating": 4.4,
   "count": 5,
   "photo": "https://d34-a.sdn.cz/d_34/c_img_p7_A/kBfrbpoeNCgOJyDdSFngQCd/8712.jpeg?fl=res,640,480,3"
  },
+ "node/2736373647": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QQ_e/5GxeJ.jpeg?fl=res,640,480,3",
+  "hours": "Tu-Th 11:00-14:00; Fr 11:00-22:00; Su,Mo off"
+ },
+ "node/2736374232": {
+  "hours": "Mo-Fr 11:00-22:00, Sa,Su 15:00-22:00"
+ },
+ "node/2742464070": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QM_x/DgzWhx.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Su,PH 07:00-10:00"
+ },
+ "node/2742464118": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QK_3/HWABB1V.jpeg?fl=res,640,480,3"
+ },
+ "node/2742464142": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_of_A/nDJ4VEZEqDjvpWEL0FEfnTM/5845.jpeg?fl=res,640,480,3"
+ },
+ "node/2742464198": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QK_q/gOYBP7.jpeg?fl=res,640,480,3"
+ },
+ "node/2742464243": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gU_l/UGSeIQ.jpeg?fl=res,640,480,3"
+ },
+ "node/2748114326": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QK_q/O8HBQB.jpeg?fl=res,640,480,3"
+ },
  "node/2905365277": {
   "rating": 4.4,
   "count": 88,
-  "photo": "https://d48-a.sdn.cz/d_48/c_img_of_A/kPRtHkVQLlCon8i0VE1XQ7m/8c9a.jpeg?fl=res,640,480,3"
+  "photo": "https://d48-a.sdn.cz/d_48/c_img_of_A/kPRtHkVQLlCon8i0VE1XQ7m/8c9a.jpeg?fl=res,640,480,3",
+  "hours": "Po–Ne 8:00–20:00"
  },
  "node/3772392123": {
   "rating": 4.8,
   "count": 11,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_oc_A/kcukOQcMmBKdMEBLWD893Yp/77e4.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_oc_A/kcukOQcMmBKdMEBLWD893Yp/77e4.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 14:00-22:00; Sa,Su 10:00-22:00"
+ },
+ "node/3780874753": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_p7_A/kOzkBkwYBTQzPhMIFFbtPSH/f0f4.jpeg?fl=res,640,480,3"
+ },
+ "node/4200764098": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gV_l/8nvBkRU.jpeg?fl=res,640,480,3"
+ },
+ "node/4356348699": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_p7_A/kOzkBkwYBTEBlmaNusFee8LL/6112.jpeg?fl=res,640,480,3"
  },
  "node/4826491797": {
   "rating": 4.3,
   "count": 6,
   "photo": "https://d34-a.sdn.cz/d_34/c_img_QM_x/7ILcUP.jpeg?fl=res,640,480,3"
  },
+ "node/5102066025": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QQ_f/HJqFVX.jpeg?fl=res,640,480,3"
+ },
+ "node/7249977985": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_gW_0/TdDBaCQ.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 06:30-18:00; Sa,Su 08:00-17:00"
+ },
  "node/7255945756": {
   "rating": 4.8,
   "count": 37,
-  "photo": "https://d48-a.sdn.cz/d_48/c_img_gR_o/biHGuW.jpeg?fl=res,640,480,3"
+  "photo": "https://d48-a.sdn.cz/d_48/c_img_gR_o/biHGuW.jpeg?fl=res,640,480,3",
+  "hours": "Po–Čt 14:00–21:00; Pá 14:00–22:00; So 11:00–22:00; Ne 11:00–21:00"
  },
  "node/7263324570": {
   "rating": 5.0,
@@ -47,7 +114,8 @@
  "node/8590072911": {
   "rating": 4.7,
   "count": 82,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_qA_A/nCTUX1iX5Do9kXTujGPVKSJ/4438.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_qA_A/nCTUX1iX5Do9kXTujGPVKSJ/4438.jpeg?fl=res,640,480,3",
+  "hours": "Po–Čt 11:00–21:00; Pá–So 11:00–23:00; Ne 11:00–20:00"
  },
  "node/8902139635": {
   "rating": 4.6,
@@ -57,22 +125,43 @@
  "node/9333768258": {
   "rating": 5.0,
   "count": 3,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_ob_A/kBj94XhVwB3TlOBagD33lYR/bc65.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_ob_A/kBj94XhVwB3TlOBagD33lYR/bc65.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Fr 07:30-22:00"
  },
  "node/9743792320": {
   "rating": 4.9,
   "count": 246,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_m3_A/nEEmzB06yC5GRoTN0Y0s/7a13.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_m3_A/nEEmzB06yC5GRoTN0Y0s/7a13.jpeg?fl=res,640,480,3",
+  "hours": "Pá–Ne 10:00–19:00"
+ },
+ "node/11953232397": {
+  "hours": "Mo-Fr 11:00-21:30; Sa 12:00-21:30; Su 13:00-21:30"
  },
  "node/12056977534": {
   "rating": 5.0,
   "count": 14,
   "photo": "https://d34-a.sdn.cz/d_34/c_img_gY_7/EgnEbn.jpeg?fl=res,640,480,3"
  },
+ "node/12269734254": {
+  "hours": "Mo-Th 08:00-21:00, Fr 08:00-22:00, Sa 09:00-22:00, Su 09:30-21:00"
+ },
+ "node/12269734255": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_oV_A/nO1SBfAluiD9J7zV5CLb0qc/f909.jpeg?fl=res,640,480,3"
+ },
+ "node/12316024504": {
+  "hours": "Mo-Sa 10:00-23:00; Su 09:30-22:30"
+ },
+ "node/12441560286": {
+  "hours": "24/7"
+ },
+ "node/12563746316": {
+  "hours": "Mo-Fr 08:00-23:00; Sa,Su 08:30-23:00"
+ },
  "node/13970692690": {
   "rating": 4.9,
   "count": 246,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_m3_A/nEEmzB06yC5GRoTN0Y0s/7a13.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_m3_A/nEEmzB06yC5GRoTN0Y0s/7a13.jpeg?fl=res,640,480,3",
+  "hours": "Pá–Ne 10:00–19:00"
  },
  "way/51772233": {
   "rating": 4.4,
@@ -84,20 +173,35 @@
   "count": 37,
   "photo": "https://d34-a.sdn.cz/d_34/c_img_gX_4/xM6glB.jpeg?fl=res,640,480,3"
  },
+ "way/58441656": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QJ_k/aUeBgt.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Th 15:00-21:00; Fr 15:00-22:00; Sa 10:00-22:00; Su 10:00-21:00"
+ },
+ "way/58967259": {
+  "photo": "https://q-xx.bstatic.com/xdata/images/hotel/max500/833704513.jpg?k=2b3576fd54f0a80322b6301e375152e5fcdc9ecdff0cae54f9bc7a8565a35649&o=&a=808251"
+ },
+ "way/205825858": {
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_QR_f/NINFXJ.jpeg?fl=res,640,480,3"
+ },
  "way/255939253": {
   "rating": 4.5,
   "count": 11,
   "photo": "https://d48-a.sdn.cz/d_48/c_img_oe_A/kOzmiQlmfoBuCN3ElDEv9lXy/38b9.jpeg?fl=res,640,480,3"
  },
+ "way/272738620": {
+  "photo": "https://d48-a.sdn.cz/d_48/c_img_qB_A/nCTUX1iX5CFdAHBMKjGhApgU/8866.jpeg?fl=res,640,480,3"
+ },
  "way/291863257": {
   "rating": 4.9,
   "count": 12,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_oY_A/kBkJRwehYBvTPBX2DBgKOW/9683.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_oY_A/kBkJRwehYBvTPBX2DBgKOW/9683.jpeg?fl=res,640,480,3",
+  "hours": "Mo-Th 10:00-22:00; Fr-Sa 10:00-00:00; Su 11:00-22:00"
  },
  "way/304425635": {
   "rating": 3.9,
   "count": 17,
-  "photo": "https://d34-a.sdn.cz/d_34/c_img_oZ_A/kBkJRwehYDlimkCByDGIyJJ/1708.jpeg?fl=res,640,480,3"
+  "photo": "https://d34-a.sdn.cz/d_34/c_img_oZ_A/kBkJRwehYDlimkCByDGIyJJ/1708.jpeg?fl=res,640,480,3",
+  "hours": "closed"
  },
  "way/830291352": {
   "rating": 4.6,

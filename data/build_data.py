@@ -74,6 +74,7 @@ for p in keep:
         if r.get("rating") is not None: p["rating"] = r["rating"]
         if r.get("count") is not None: p["ratingCount"] = r["count"]
         if r.get("photo") and not p.get("photo"): p["photo"] = r["photo"]
+        if r.get("hours") and not p.get("opening_hours"): p["opening_hours"] = r["hours"]
 
 DAYEND = [
   {"day":1,"km":13.4,"maxoff":250,"name":"Nocleh 1 – přístřešek na hřebeni"},
