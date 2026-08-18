@@ -2,81 +2,172 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Přechod Bílých Karpat · Púchov → Myjava</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  :root{--bg:#1e2126;--panel:#262a31;--card:#2e333b;--txt:#e8eaed;--mut:#9aa0a8;--acc:#4dabf7}
+  :root{
+    --bg:#0e1013; --surface:#15181d; --surface-2:#1d212a; --surface-3:#252a34;
+    --line:rgba(255,255,255,.08); --line-strong:rgba(255,255,255,.14);
+    --txt:#f2f3f6; --txt-2:#9ba3af; --txt-3:#6b7280;
+    --accent:#8b7cf6; --accent-strong:#7c6af2; --accent-tint:rgba(139,124,246,.14);
+    --ok:#7dc9a0; --warn:#e8c268;
+    --r-lg:18px; --r:14px; --r-sm:10px;
+    --sheetpx:0px; --chartpx:0px;
+  }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;overflow:hidden}
-  #side{width:360px;min-width:300px;background:var(--panel);overflow-y:auto;padding:14px;flex-shrink:0}
-  #main{flex:1;display:flex;flex-direction:column;min-width:0}
-  #map{flex:1}
-  #chartbox{height:150px;background:var(--panel);position:relative;border-top:1px solid #3a4048;display:none}
-  #chartbox.shown{display:block}
-  #profbtn{background:var(--panel);color:var(--txt);border:1px solid #3a4048;border-radius:8px;
-    padding:7px 11px;font-size:12.5px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.4)}
-  h1{font-size:17px;margin:0 0 2px}
-  .sub{color:var(--mut);font-size:12px;margin-bottom:10px}
-  .totals{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
-  .tot{background:var(--card);border-radius:8px;padding:6px 10px;font-size:12px}
-  .tot b{font-size:15px;display:block}
-  .day{background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;border-left:5px solid #888;transition:background .15s}
-  .day:hover{background:#363c46}
-  .day.active{outline:2px solid var(--acc)}
-  .day h3{margin:0;font-size:13.5px}
-  .day .dd{color:var(--mut);font-size:11px}
-  .day .st{font-size:11.5px;margin-top:4px;color:#c6cbd2}
-  .day .desc{font-size:11.5px;color:var(--mut);margin-top:6px;display:none;line-height:1.45}
+  html,body{height:100%}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;
+    background:var(--bg);color:var(--txt);display:flex;overflow:hidden;
+    -webkit-font-smoothing:antialiased;font-size:14px}
+
+  /* ---------- panel ---------- */
+  #side{width:360px;min-width:320px;background:var(--surface);overflow-y:auto;padding:18px 16px;
+    flex-shrink:0;border-right:1px solid var(--line);overscroll-behavior:contain}
+  #grab{display:none}
+  h1{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0 0 3px}
+  .sub{color:var(--txt-2);font-size:12px;line-height:1.5;margin-bottom:14px}
+  .sub a{color:var(--accent)}
+
+  .totals{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .tot{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+    padding:8px 6px;text-align:center}
+  .tot b{display:block;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  .tot span{font-size:10.5px;color:var(--txt-3)}
+
+  .sec{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--txt-3);margin:18px 2px 8px}
+
+  .day{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);
+    padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s}
+  .day:hover{background:var(--surface-3)}
+  .day.active{border-color:var(--accent);background:var(--surface-3)}
+  .day h3{margin:0;font-size:13.5px;font-weight:600;display:flex;align-items:baseline;gap:8px}
+  .day h3 .dnum{color:var(--accent);font-variant-numeric:tabular-nums}
+  .day .dd{color:var(--txt-3);font-size:11px;margin-top:2px}
+  .day .st{font-size:12px;margin-top:6px;color:var(--txt-2);font-variant-numeric:tabular-nums}
+  .day .desc{font-size:12px;color:var(--txt-2);margin-top:8px;line-height:1.55;display:none}
   .day.active .desc{display:block}
-  .day .sleep{font-size:11.5px;margin-top:5px;color:#ffd479;display:none}
+  .day .sleep{font-size:12px;margin-top:7px;color:var(--warn);display:none;line-height:1.45}
   .day.active .sleep{display:block}
-  .layers{margin:14px 0 10px}
-  .layers label{display:flex;align-items:center;gap:7px;font-size:13px;padding:4px 2px;cursor:pointer}
-  .layers .cnt{color:var(--mut);font-size:11px;margin-left:auto}
-  .btn{display:inline-block;background:var(--acc);color:#10131a;font-weight:600;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;cursor:pointer;margin:2px 4px 2px 0}
-  .btn.sec{background:var(--card);color:var(--txt)}
-  .note{font-size:11px;color:var(--mut);margin-top:10px;line-height:1.5}
-  .pin{width:26px;height:26px;border-radius:50% 50% 50% 4px;background:#fff;border:2.5px solid #555;
-       display:flex;align-items:center;justify-content:center;font-size:14px;
-       box-shadow:0 2px 5px rgba(0,0,0,.45);transform:rotate(0deg)}
-  .camp-pin{width:34px;height:34px;border-radius:50%;background:#2b3035;border:2.5px solid #ffd479;color:#fff;
-       display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.55)}
-  .leaflet-popup-content{font-size:12.5px;line-height:1.5;margin:10px 14px}
-  .leaflet-popup-content b{font-size:13px}
-  .pcat{color:#666;font-size:11px}
-  .ppop img{max-width:100%;max-height:160px;border-radius:8px;margin-top:6px;display:block;object-fit:cover}
+
+  /* rows with switches */
+  .row{display:flex;align-items:center;gap:10px;padding:9px 2px;min-height:40px}
+  .row + .row{border-top:1px solid var(--line)}
+  .row .ic{width:28px;height:28px;border-radius:8px;background:var(--surface-3);
+    display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .row .lbl{font-size:13.5px;flex:1;min-width:0}
+  .row .cnt{color:var(--txt-3);font-size:11.5px;font-variant-numeric:tabular-nums}
+  .sw{position:relative;width:42px;height:26px;flex-shrink:0}
+  .sw input{opacity:0;width:100%;height:100%;margin:0;cursor:pointer;position:absolute;z-index:1}
+  .sw i{position:absolute;inset:0;border-radius:13px;background:var(--surface-3);
+    border:1px solid var(--line-strong);transition:background .18s;pointer-events:none}
+  .sw i::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .18s}
+  .sw input:checked + i{background:var(--accent-strong);border-color:transparent}
+  .sw input:checked + i::after{transform:translateX(16px)}
+
+  .hint{font-size:11px;color:var(--txt-3);margin:6px 2px 0;line-height:1.5}
+
+  .btns{display:flex;gap:8px;margin-top:14px}
+  .btn{flex:1;background:var(--accent-strong);color:#fff;font-weight:600;border:none;
+    border-radius:12px;padding:11px 12px;font-size:13px;cursor:pointer;transition:filter .15s}
+  .btn:hover{filter:brightness(1.1)}
+  .btn.sec2{background:var(--accent-tint);color:var(--accent)}
+  .note{font-size:11px;color:var(--txt-3);margin:14px 2px calc(10px + env(safe-area-inset-bottom));line-height:1.55}
+  .note a{color:var(--accent)}
+
+  /* ---------- map area ---------- */
+  #main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+  #map{flex:1;background:#dfe6dd}
+  #chartbox{height:150px;background:var(--surface);position:relative;border-top:1px solid var(--line);display:none}
+  #chartbox.shown{display:block}
+  #chart{width:100%;height:100%;display:block}
+  #chtip{position:absolute;top:8px;right:12px;background:var(--surface-3);border:1px solid var(--line);
+    color:var(--txt);font-size:11.5px;padding:4px 10px;border-radius:8px;pointer-events:none;display:none;
+    font-variant-numeric:tabular-nums}
+
+  /* pins */
+  .pin{width:27px;height:27px;border-radius:50% 50% 50% 5px;background:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:13.5px;
+    box-shadow:0 1px 2px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25);border:2px solid #555}
+  .camp-pin{width:34px;height:34px;border-radius:50%;background:#1d212a;border:2px solid var(--warn);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;
+    box-shadow:0 2px 8px rgba(0,0,0,.5)}
+
+  /* leaflet restyle */
+  .leaflet-popup-content-wrapper{background:var(--surface-2);color:var(--txt);border-radius:var(--r);
+    border:1px solid var(--line-strong);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  .leaflet-popup-tip{background:var(--surface-2);border:1px solid var(--line-strong)}
+  .leaflet-popup-content{font-size:12.5px;line-height:1.55;margin:12px 14px}
+  .leaflet-popup-content b{font-size:13.5px;font-weight:600}
+  .leaflet-popup-close-button{color:var(--txt-3) !important;font-size:18px !important;padding:6px 8px 0 0 !important}
+  .pcat{color:var(--txt-3);font-size:11px}
+  .ppop a{color:var(--accent)}
+  .ppop img{max-width:100%;max-height:160px;border-radius:10px;margin-top:8px;display:block;object-fit:cover}
   .ppop.wphoto{min-width:230px}
-  .mlink{display:inline-block;margin-top:6px;font-size:11.5px}
-  .hrs{background:#eef4ea;color:#33691e;border-radius:5px;padding:1px 6px;display:inline-block;margin-top:3px;font-size:11.5px}
-  #chart{width:100%;height:100%}
-  #chtip{position:absolute;top:6px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11.5px;padding:3px 8px;border-radius:6px;pointer-events:none;display:none}
-  #burger{display:none;position:absolute;z-index:1200;top:10px;left:10px;background:var(--panel);color:var(--txt);border:none;border-radius:8px;padding:8px 10px;font-size:16px}
-  @media(max-width:760px){
-    #side{position:absolute;z-index:1100;height:100%;transform:translateX(-100%);transition:transform .2s}
-    #side.open{transform:none}
-    #burger{display:block}
+  .mlink{display:inline-block;margin-top:7px;font-size:11.5px}
+  .hrs{background:rgba(125,201,160,.12);color:var(--ok);border-radius:6px;padding:2px 7px;
+    display:inline-block;margin-top:4px;font-size:11.5px}
+  .rating{color:var(--warn);font-size:12px;margin-top:2px;display:inline-block}
+
+  .leaflet-bar{border:none !important;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  .leaflet-bar a{background:var(--surface-2) !important;color:var(--txt) !important;
+    border-bottom:1px solid var(--line) !important;width:34px !important;height:34px !important;line-height:34px !important}
+  .leaflet-bar a:first-child{border-radius:10px 10px 0 0 !important}
+  .leaflet-bar a:last-child{border-radius:0 0 10px 10px !important;border-bottom:none !important}
+  #profbtn{background:var(--surface-2);color:var(--txt);border:none;border-radius:10px;
+    padding:9px 13px;font-size:12.5px;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+  .leaflet-control-layers{background:var(--surface-2) !important;color:var(--txt) !important;
+    border:1px solid var(--line-strong) !important;border-radius:10px !important;box-shadow:0 2px 10px rgba(0,0,0,.35) !important}
+  .leaflet-control-layers-expanded{padding:10px 14px !important}
+  .leaflet-control-attribution{background:rgba(14,16,19,.7) !important;color:var(--txt-3) !important;font-size:10px !important}
+  .leaflet-control-attribution a{color:var(--txt-2) !important}
+
+  /* ---------- mobile: bottom sheet ---------- */
+  @media (max-width:760px){
+    body{flex-direction:column}
+    #main{position:fixed;inset:0}
+    #side{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;
+      height:42vh;max-height:92vh;z-index:1100;border-right:none;border-top:1px solid var(--line-strong);
+      border-radius:var(--r-lg) var(--r-lg) 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.45);
+      padding-top:4px;transition:height .22s ease-out}
+    #side.dragging{transition:none}
+    #grab{display:block;position:sticky;top:-4px;z-index:5;background:var(--surface);
+      margin:-4px -16px 6px;padding:10px 0 8px;touch-action:none;cursor:grab}
+    #grab::before{content:'';display:block;width:40px;height:4.5px;border-radius:3px;
+      background:var(--line-strong);margin:0 auto}
+    #chartbox{position:fixed;left:0;right:0;bottom:var(--sheetpx);z-index:1050;height:130px;
+      border-top:1px solid var(--line-strong)}
+    .leaflet-bottom{bottom:calc(var(--sheetpx) + var(--chartpx)) !important;transition:bottom .22s ease-out}
+    .leaflet-popup-content{max-width:76vw}
   }
 </style>
 </head>
 <body>
-<div id="side" class="open">
-  <h1>🥾 Přechod Bílých Karpat</h1>
+<div id="side">
+  <div id="grab"></div>
+  <h1>Přechod Bílých Karpat</h1>
   <div class="sub">Púchov → Myjava žel. st. · st 19. 8. – ne 23. 8. 2026 · hřebenovka Bílých Karpat</div>
   <div class="totals" id="totals"></div>
+  <div class="sec">Itinerář</div>
   <div id="days"></div>
-  <div class="layers" id="layers"></div>
-  <button class="btn" onclick="exportGPX(false)">⬇ GPX trasa</button>
-  <button class="btn sec" onclick="exportGPX(true)">⬇ GPX + body</button>
+  <div class="sec">Vrstvy</div>
+  <div id="layers"></div>
+  <div class="sec">Filtr fotek</div>
+  <div id="photofilter"></div>
+  <div class="hint">Místa bez fotky bývají méně ověřená.</div>
+  <div class="btns">
+    <button class="btn" onclick="exportGPX(false)">Stáhnout GPX</button>
+    <button class="btn sec2" onclick="exportGPX(true)">GPX + body</button>
+  </div>
   <div class="note">
-    Trasa: vlastní plán z Mapy.com (<a href="https://mapy.com/s/jogojevesa" target="_blank">odkaz na trasu</a>) – v terénu se držte značení.
+    Trasa: vlastní plán z Mapy.com (<a href="https://mapy.com/s/jogojevesa" target="_blank">odkaz</a>) – v terénu se držte značení.
     Body zájmu z OpenStreetMap (±1,2 km od trasy) – pitnost pramenů a stav přístřešků neověřeny.
-    Hodnocení hospod: odkaz „na Mapy.com“ v detailu bodu.
     Před cestou: stáhnout GPX + offline mapu v aplikaci Mapy.cz, na hřebeni je slabý signál.
   </div>
 </div>
 <div id="main">
-  <button id="burger" onclick="document.getElementById('side').classList.toggle('open')">☰</button>
   <div id="map"></div>
   <div id="chartbox"><svg id="chart" preserveAspectRatio="none"></svg><div id="chtip"></div></div>
 </div>
@@ -84,17 +175,20 @@
 <script src="data.js"></script>
 <script>
 const MAPY_KEY = "R5Mv77riBsFzTqnOmEt6ay0pokzp4Pv2JwDm0ZEPCX8";
+const ACCENT = '#8b7cf6';
 function cap(s){ s = String(s); return s.charAt(0).toUpperCase() + s.slice(1); }
+const isMobile = ()=> window.innerWidth <= 760;
 
 const map = L.map('map', {zoomControl:false});
 L.control.zoom({position:'bottomright'}).addTo(map);
 const ProfCtl = L.Control.extend({onAdd(){
   const b = document.createElement('button');
-  b.id = 'profbtn'; b.textContent = '📈 Výškový profil'; b.onclick = ()=>toggleChart();
+  b.id = 'profbtn'; b.textContent = '📈 Profil'; b.onclick = ()=>toggleChart();
   L.DomEvent.disableClickPropagation(b);
   return b;
 }});
 new ProfCtl({position:'bottomright'}).addTo(map);
+
 const attr = MAPY_KEY ? '<a href="https://api.mapy.cz/copyright" target="_blank">© Seznam.cz a.s. a další</a>' : '© OpenStreetMap contributors';
 function mapyLayer(set){return L.tileLayer(`https://api.mapy.cz/v1/maptiles/${set}/256/{z}/{x}/{y}?apikey=${MAPY_KEY}`,{maxZoom:19,attribution:attr});}
 const bases = MAPY_KEY ? {
@@ -113,73 +207,70 @@ if (MAPY_KEY){
   new Logo({position:'bottomleft'}).addTo(map);
 }
 
-// ---- trasa: jedna výrazná barva s bílým obrysem, dny jako klikatelné segmenty ----
-const ROUTE = '#6741d9', ROUTE_HI = '#ff6b00';
+// ---------- trasa ----------
 const dayCore = [], dayCasing = [];
 let bounds = null;
 TREK.days.forEach(d=>{
-  const casing = L.polyline(d.latlngs,{color:'#ffffff',weight:9,opacity:.9}).addTo(map);
-  const core   = L.polyline(d.latlngs,{color:ROUTE,weight:5,opacity:.95}).addTo(map);
-  core.bindPopup(`<b>Den ${d.n}: ${d.name}</b><br>${d.day}<br>${d.dist} km · ↑${d.up} m ↓${d.down} m · ~${d.hours} h chůze`);
+  const casing = L.polyline(d.latlngs,{color:'#ffffff',weight:9,opacity:.92}).addTo(map);
+  const core   = L.polyline(d.latlngs,{color:ACCENT,weight:5,opacity:.95}).addTo(map);
+  core.bindPopup(`<div class="ppop"><b>Den ${d.n} · ${d.name}</b><br><span class="pcat">${d.day}</span><br>${String(d.dist).replace('.',',')} km · ↑${d.up} m · ↓${d.down} m · ~${String(d.hours).replace('.',',')} h chůze</div>`);
   core.on('click',()=>selectDay(d.n,false));
   casing.on('click',()=>selectDay(d.n,false));
   dayCore.push(core); dayCasing.push(casing);
   bounds = bounds ? bounds.extend(core.getBounds()) : core.getBounds();
 });
-function sidePad(){ // na mobilu překrývá rozbalené menu mapu zleva
-  const side = document.getElementById('side');
-  return (window.innerWidth <= 760 && side.classList.contains('open')) ? [Math.min(370, window.innerWidth*0.85), 0] : [0, 0];
+function fitPad(){
+  // mobil: mapa je pod bottom-sheetem, odsaď fit o výšku sheetu; desktop drobný okraj
+  return isMobile() ? {paddingTopLeft:[16,16], paddingBottomRight:[16, sheetH + 16]} : {padding:[24,24]};
 }
-function fitAll(){ map.invalidateSize(); map.fitBounds(bounds.pad(0.05), {paddingTopLeft: sidePad()}); }
-fitAll();
-window.addEventListener('load', fitAll);
+function fitAll(){ map.invalidateSize(); map.fitBounds(bounds, fitPad()); }
 
-// ---- noclehy / start / cíl ----
+// ---------- noclehy / start / cíl ----------
 TREK.dayEnds.forEach(de=>{
-  const emoji = (de.name.startsWith('Cíl')||de.name.startsWith('Záložní')) ? '🚉' : '⛺';
+  const emoji = de.name.startsWith('Cíl') ? '🚉' : '⛺';
   const ic = L.divIcon({className:'',html:`<div class="camp-pin">${emoji}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
   L.marker([de.lat,de.lon],{icon:ic,zIndexOffset:900}).addTo(map)
-   .bindPopup(`<b>${de.name}</b><br>km ${String(de.km).replace('.',',')}`);
+   .bindPopup(`<div class="ppop"><b>${de.name}</b><br><span class="pcat">km ${String(de.km).replace('.',',')}</span></div>`);
 });
 L.marker([TREK.days[0].latlngs[0][0],TREK.days[0].latlngs[0][1]],
   {icon:L.divIcon({className:'',html:'<div class="camp-pin">🚩</div>',iconSize:[34,34],iconAnchor:[17,17]}),zIndexOffset:900})
- .addTo(map).bindPopup('<b>Start – Púchov, žel. st.</b><br>středa ~12:00');
+ .addTo(map).bindPopup('<div class="ppop"><b>Start – Púchov, žel. st.</b><br><span class="pcat">středa ~12:00</span></div>');
 
-// ---- POI vrstvy ----
+// ---------- POI ----------
 let activeDay = null;
 const CATS = {
-  hut:    {label:'🛖 Útulny a chaty', on:true, color:'#6d3f1f'},
-  shelter:{label:'🏕️ Přístřešky (otevřené)', on:true,  color:'#a9803f'},
-  lodging:{label:'🏠 Chaty / penziony (placené)', on:true, color:'#5d4037'},
-  water:  {label:'💧 Voda (prameny, studánky)', on:true, color:'#1971c2'},
-  food:   {label:'🍺 Hospody / restaurace', on:true, color:'#e8590c'},
-  shop:   {label:'🛒 Obchody', on:true, color:'#2f9e44'},
+  hut:    {label:'Útulny a chaty', on:true,  color:'#8a6d4f'},
+  shelter:{label:'Přístřešky (otevřené)', on:true, color:'#b8905f'},
+  lodging:{label:'Chaty / penziony (placené)', on:true, color:'#a3785f'},
+  water:  {label:'Voda (prameny, studánky)', on:true, color:'#5a8dd6'},
+  food:   {label:'Hospody / restaurace', on:true, color:'#d97a4a'},
+  shop:   {label:'Obchody', on:true, color:'#5aa06c'},
 };
 const SUBNAMES = {shelter:'přístřešek',butcher:'řeznictví',picnic_shelter:'piknikový přístřešek',weather_shelter:'přístřešek proti počasí',basic_hut:'útulna (uzavíratelná)',
   building:'budova-přístřešek',gazebo:'altán',public_transport:'zastávková bouda',lean_to:'přístřešek',wilderness_hut:'útulna',
   alpine_hut:'horská chata',hotel:'hotel',guest_house:'penzion',hostel:'hostel',chalet:'chata',camp_site:'kemp',motel:'motel',
   spring:'pramen',water_well:'studna',water_tap:'kohoutek',drinking_water:'pitná voda',pub:'hospoda',restaurant:'restaurace',
   cafe:'kavárna',fast_food:'rychlé občerstvení',biergarten:'zahrádka',convenience:'večerka/smíšenka',supermarket:'supermarket',
-  bakery:'pekárna',greengrocer:'ovoce-zelenina',general:'smíšené zboží'};
+  bakery:'pekárna',greengrocer:'ovoce-zelenina',general:'smíšené zboží',fuel:'čerpací stanice'};
 const EMO = {hut:'🛖',shelter:'🏕️',lodging:'🏠',water:'💧',food:'🍺',shop:'🛒'};
 const poiLayer = L.layerGroup().addTo(map);
 const poiMarkers = [];
 TREK.pois.forEach(p=>{
   const ic = L.divIcon({className:'',html:`<div class="pin" style="border-color:${CATS[p.cat].color}">${EMO[p.cat]}</div>`,
-                        iconSize:[26,26],iconAnchor:[13,24]});
+                        iconSize:[27,27],iconAnchor:[13,25]});
   const title = cap(p.name || SUBNAMES[p.sub] || p.cat);
   const mapyUrl = `https://mapy.com/cs/turisticka?q=${encodeURIComponent(p.name || SUBNAMES[p.sub] || '')}&x=${p.lon}&y=${p.lat}&z=18`;
   let html = `<div class="ppop${p.photo ? ' wphoto' : ''}"><b>${EMO[p.cat]} ${title}</b><br><span class="pcat">${SUBNAMES[p.sub]||p.sub} · km ${p.km.toFixed(1).replace('.',',')} · ${p.off} m od trasy</span>`;
-  if(p.rating) html += `<br>⭐ ${p.rating.toFixed(1).replace('.',',')}${p.ratingCount!=null ? ` · ${p.ratingCount} hodnocení` : ''}`;
-  if(p.drinking_water) html += `<br>pitná voda: ${p.drinking_water==='yes'?'ano':p.drinking_water==='no'?'ne':p.drinking_water}`;
+  if(p.rating) html += `<br><span class="rating">★ ${p.rating.toFixed(1).replace('.',',')}${p.ratingCount!=null ? ` · ${p.ratingCount} hodnocení` : ''}</span>`;
+  if(p.drinking_water) html += `<br>pitná voda: ${p.drinking_water==='yes'?'ano':p.drinking_water==='no'?'ne':'podmíněně (neověřeno)'}`;
   if(p.opening_hours) html += `<br><span class="hrs">🕐 ${p.opening_hours}</span>`;
   if(p.description||p.note) html += `<br><i>${p.description||p.note}</i>`;
   if(p.phone) html += `<br>📞 ${p.phone}`;
   if(p.photo) html += `<a href="${p.photoPage||p.photo}" target="_blank"><img src="${p.photo}" loading="lazy" alt="" onerror="this.parentElement.style.display='none'"></a>`;
-  html += `<br><a class="mlink" href="${mapyUrl}" target="_blank">${p.cat==='food'?'⭐ hodnocení a fotky na Mapy.com':'🔍 na Mapy.com'}</a>`;
+  html += `<br><a class="mlink" href="${mapyUrl}" target="_blank">${p.cat==='food'?'★ hodnocení a fotky na Mapy.com':'Otevřít na Mapy.com'}</a>`;
   if(p.website) html += ` · <a class="mlink" href="${p.website}" target="_blank">web</a>`;
   html += `</div>`;
-  poiMarkers.push({m: L.marker([p.lat,p.lon],{icon:ic}).bindPopup(html), cat: p.cat, km: p.km, photo: !!p.photo});
+  poiMarkers.push({m: L.marker([p.lat,p.lon],{icon:ic}).bindPopup(html,{autoPanPadding:[24,70]}), cat: p.cat, km: p.km, photo: !!p.photo});
 });
 const PHOTO_F = {yes: true, no: true};
 function syncPois(){
@@ -189,40 +280,39 @@ function syncPois(){
     if(!want && poiLayer.hasLayer(pm.m)) poiLayer.removeLayer(pm.m);
   });
 }
+function makeRow(parent, emoji, label, count, checked, onchange){
+  const row = document.createElement('div'); row.className = 'row';
+  row.innerHTML = `<div class="ic">${emoji}</div><div class="lbl">${label}</div>
+    <div class="cnt">${count}</div>
+    <label class="sw"><input type="checkbox" ${checked?'checked':''}><i></i></label>`;
+  row.querySelector('input').onchange = onchange;
+  parent.appendChild(row);
+}
 const layersDiv = document.getElementById('layers');
 Object.entries(CATS).forEach(([c,cfg])=>{
   const n = TREK.pois.filter(p=>p.cat===c).length;
-  const l = document.createElement('label');
-  l.innerHTML = `<input type="checkbox" ${cfg.on?'checked':''}> ${cfg.label} <span class="cnt">${n}</span>`;
-  l.querySelector('input').onchange = e=>{ cfg.on = e.target.checked; syncPois(); };
-  layersDiv.appendChild(l);
+  makeRow(layersDiv, EMO[c], cfg.label, n, cfg.on, e=>{ cfg.on = e.target.checked; syncPois(); });
 });
-const pf = document.createElement('div');
-pf.style.cssText = 'margin-top:8px;padding-top:8px;border-top:1px solid #3a4048';
-pf.innerHTML = '<div style="font-size:11px;color:var(--mut);margin-bottom:2px">Filtr podle fotky (místa bez fotky bývají méně ověřená):</div>';
-[['yes','📷 S fotkou'],['no','Bez fotky']].forEach(([k,label])=>{
+const pfDiv = document.getElementById('photofilter');
+[['yes','📷','S fotkou'],['no','▫️','Bez fotky']].forEach(([k,emo,label])=>{
   const n = TREK.pois.filter(p=>(!!p.photo)===(k==='yes')).length;
-  const l = document.createElement('label');
-  l.innerHTML = `<input type="checkbox" checked> ${label} <span class="cnt">${n}</span>`;
-  l.querySelector('input').onchange = e=>{ PHOTO_F[k] = e.target.checked; syncPois(); };
-  pf.appendChild(l);
+  makeRow(pfDiv, emo, label, n, true, e=>{ PHOTO_F[k] = e.target.checked; syncPois(); });
 });
-layersDiv.appendChild(pf);
 syncPois();
 
-// ---- sidebar ----
+// ---------- panel ----------
 const up = TREK.days.reduce((s,d)=>s+d.up,0), down = TREK.days.reduce((s,d)=>s+d.down,0);
 document.getElementById('totals').innerHTML =
-  `<div class="tot"><b>${String(TREK.total).replace('.',',')} km</b>celkem</div>
-   <div class="tot"><b>↑ ${up} m</b>stoupání</div>
-   <div class="tot"><b>↓ ${down} m</b>klesání</div>
-   <div class="tot"><b>4 noci</b>venku</div>`;
+  `<div class="tot"><b>${String(TREK.total).replace('.',',')}</b><span>km</span></div>
+   <div class="tot"><b>${up}</b><span>m ↑</span></div>
+   <div class="tot"><b>${down}</b><span>m ↓</span></div>
+   <div class="tot"><b>4</b><span>noci</span></div>`;
 const daysDiv = document.getElementById('days');
 TREK.days.forEach(d=>{
   const el = document.createElement('div');
-  el.className='day'; el.style.borderLeftColor=d.color; el.id='day'+d.n;
-  el.innerHTML = `<h3>Den ${d.n} · ${d.name}</h3><div class="dd">${d.day} · km ${d.kmFrom}–${d.kmTo}</div>
-    <div class="st">${String(d.dist).replace('.',',')} km · ↑${d.up} m · ↓${d.down} m · ~${String(d.hours).replace('.',',')} h chůze</div>
+  el.className='day'; el.id='day'+d.n;
+  el.innerHTML = `<h3><span class="dnum">${d.n}</span> ${d.name}</h3><div class="dd">${d.day} · km ${d.kmFrom}–${d.kmTo}</div>
+    <div class="st">${String(d.dist).replace('.',',')} km · ↑${d.up} m · ↓${d.down} m · ~${String(d.hours).replace('.',',')} h</div>
     <div class="desc">${d.desc}</div><div class="sleep">⛺ ${d.sleep}</div>`;
   el.onclick = ()=>selectDay(d.n,true);
   daysDiv.appendChild(el);
@@ -232,74 +322,138 @@ function selectDay(n, zoom){
   document.querySelectorAll('.day').forEach(e=>e.classList.remove('active'));
   dayCore.forEach((l,i)=>{
     const hi = activeDay===i+1, dim = activeDay!==null && !hi;
-    l.setStyle({color: hi ? ROUTE_HI : ROUTE, weight: hi ? 6 : 5, opacity: dim ? .45 : .95});
-    dayCasing[i].setStyle({opacity: dim ? .4 : .9});
+    l.setStyle({color: ACCENT, weight: hi ? 7 : 5, opacity: dim ? .3 : .95});
+    dayCasing[i].setStyle({opacity: dim ? .3 : .92});
   });
   if(activeDay){
     document.getElementById('day'+n).classList.add('active');
-    if(zoom) map.fitBounds(dayCore[n-1].getBounds().pad(0.12), {paddingTopLeft: sidePad()});
-  } else if(zoom) map.fitBounds(bounds.pad(0.05), {paddingTopLeft: sidePad()});
-  syncPois();
+    if(zoom) map.fitBounds(dayCore[n-1].getBounds(), fitPad());
+  } else if(zoom) map.fitBounds(bounds, fitPad());
   drawChart();
 }
 
-// ---- výškový profil ----
+// ---------- výškový profil ----------
 const svg = document.getElementById('chart'), tip = document.getElementById('chtip');
 let hoverMarker = null;
+function chartGeom(){
+  const P = TREK.profile, W = svg.clientWidth, H = svg.clientHeight;
+  const kmMax = P[P.length-1].km;
+  const eMin = Math.min(...P.map(p=>p.ele))-30, eMax = Math.max(...P.map(p=>p.ele))+30;
+  return {P, W, H, kmMax, X: km=>km/kmMax*W, Y: e=>H-8-(e-eMin)/(eMax-eMin)*(H-24)};
+}
 function drawChart(){
-  const W = svg.clientWidth, H = svg.clientHeight, P = TREK.profile;
+  if(!document.getElementById('chartbox').classList.contains('shown')) return;
+  const {P, W, H, kmMax, X, Y} = chartGeom();
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
-  const kmMax = TREK.profile[TREK.profile.length-1].km, eMin = Math.min(...P.map(p=>p.ele))-30, eMax = Math.max(...P.map(p=>p.ele))+30;
-  const X = km=>km/kmMax*W, Y = e=>H-8-(e-eMin)/(eMax-eMin)*(H-22);
-  let s = '';
+  let s = `<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${ACCENT}" stop-opacity=".45"/>
+    <stop offset="1" stop-color="${ACCENT}" stop-opacity=".04"/></linearGradient></defs>`;
   TREK.days.forEach(d=>{
     const seg = P.filter(p=>p.km>=d.kmFrom-0.15 && p.km<=d.kmTo+0.15);
     if(!seg.length) return;
     const pts = seg.map(p=>`${X(p.km).toFixed(1)},${Y(p.ele).toFixed(1)}`).join(' ');
     const dim = activeDay && activeDay!==d.n;
-    s += `<polygon points="${X(seg[0].km).toFixed(1)},${H} ${pts} ${X(seg[seg.length-1].km).toFixed(1)},${H}" fill="${d.color}" opacity="${dim?0.12:0.35}"/>`;
-    s += `<polyline points="${pts}" fill="none" stroke="${d.color}" stroke-width="2" opacity="${dim?0.3:1}"/>`;
-    s += `<text x="${X((d.kmFrom+d.kmTo)/2)}" y="14" fill="#aaa" font-size="10" text-anchor="middle">D${d.n}</text>`;
+    s += `<polygon points="${X(seg[0].km).toFixed(1)},${H} ${pts} ${X(seg[seg.length-1].km).toFixed(1)},${H}" fill="url(#ag)" opacity="${dim?0.25:1}"/>`;
+    s += `<polyline points="${pts}" fill="none" stroke="${ACCENT}" stroke-width="1.8" opacity="${dim?0.3:1}"/>`;
+    s += `<text x="${X((d.kmFrom+d.kmTo)/2)}" y="15" fill="${dim?'rgba(155,163,175,.4)':'#9ba3af'}" font-size="10" font-weight="600" text-anchor="middle">${d.n}</text>`;
   });
-  TREK.dayEnds.forEach(de=>{ if(de.km && de.name.startsWith('Nocleh') && de.km < kmMax - 0.5){ s += `<line x1="${X(de.km)}" y1="0" x2="${X(de.km)}" y2="${H}" stroke="#888" stroke-dasharray="3,3" stroke-width="1"/>`; }});
-  s += `<line id="xline" y1="0" y2="${H}" stroke="#fff" stroke-width="1" opacity=".7" style="display:none"/>`;
-  s += `<circle id="xdot" r="3.5" fill="#ff5252" stroke="#fff" stroke-width="1.5" style="display:none"/>`;
+  TREK.dayEnds.forEach(de=>{ if(de.km && de.name.startsWith('Nocleh') && de.km < kmMax - 0.5){
+    s += `<line x1="${X(de.km)}" y1="20" x2="${X(de.km)}" y2="${H}" stroke="rgba(255,255,255,.14)" stroke-dasharray="3,4" stroke-width="1"/>`; }});
+  s += `<line id="xline" y1="0" y2="${H}" stroke="rgba(255,255,255,.6)" stroke-width="1" style="display:none"/>`;
+  s += `<circle id="xdot" r="3.5" fill="#ff6b6b" stroke="#fff" stroke-width="1.5" style="display:none"/>`;
   svg.innerHTML = s;
 }
-svg.parentElement.addEventListener('mousemove', ev=>{
-  const r = svg.getBoundingClientRect(), km = (ev.clientX-r.left)/r.width*TREK.total;
-  let best = TREK.profile[0];
-  for(const p of TREK.profile) if(Math.abs(p.km-km)<Math.abs(best.km-km)) best = p;
+function chartHover(clientX){
+  const r = svg.getBoundingClientRect();
+  const {P, kmMax, X, Y} = chartGeom();
+  const km = Math.max(0, Math.min(kmMax, (clientX-r.left)/r.width*kmMax));
+  let best = P[0];
+  for(const p of P) if(Math.abs(p.km-km)<Math.abs(best.km-km)) best = p;
   tip.style.display='block';
   tip.textContent = `km ${best.km.toFixed(1).replace('.',',')} · ${Math.round(best.ele)} m n. m.`;
-  const W = svg.clientWidth, H = svg.clientHeight;
-  const kmMax = TREK.profile[TREK.profile.length-1].km;
-  const eMin = Math.min(...TREK.profile.map(p=>p.ele))-30, eMax = Math.max(...TREK.profile.map(p=>p.ele))+30;
-  const x = best.km/kmMax*W, y = H-8-(best.ele-eMin)/(eMax-eMin)*(H-22);
   const xl = document.getElementById('xline'), xd = document.getElementById('xdot');
-  if(xl){ xl.setAttribute('x1',x); xl.setAttribute('x2',x); xl.style.display='block'; }
-  if(xd){ xd.setAttribute('cx',x); xd.setAttribute('cy',y); xd.style.display='block'; }
-  if(!hoverMarker) hoverMarker = L.circleMarker([best.lat,best.lon],{radius:7,color:'#fff',weight:2,fillColor:'#ff5252',fillOpacity:1}).addTo(map);
+  if(xl){ xl.setAttribute('x1',X(best.km)); xl.setAttribute('x2',X(best.km)); xl.style.display='block'; }
+  if(xd){ xd.setAttribute('cx',X(best.km)); xd.setAttribute('cy',Y(best.ele)); xd.style.display='block'; }
+  if(!hoverMarker) hoverMarker = L.circleMarker([best.lat,best.lon],{radius:7,color:'#fff',weight:2,fillColor:'#ff6b6b',fillOpacity:1}).addTo(map);
   else hoverMarker.setLatLng([best.lat,best.lon]);
-});
-svg.parentElement.addEventListener('mouseleave', ()=>{ tip.style.display='none';
+}
+function chartLeave(){
+  tip.style.display='none';
   for(const id of ['xline','xdot']){ const el=document.getElementById(id); if(el) el.style.display='none'; }
-  if(hoverMarker){map.removeLayer(hoverMarker);hoverMarker=null;} });
+  if(hoverMarker){ map.removeLayer(hoverMarker); hoverMarker=null; }
+}
+svg.parentElement.addEventListener('mousemove', ev=>chartHover(ev.clientX));
+svg.parentElement.addEventListener('mouseleave', chartLeave);
+svg.parentElement.addEventListener('touchmove', ev=>{ chartHover(ev.touches[0].clientX); ev.preventDefault(); }, {passive:false});
+svg.parentElement.addEventListener('touchend', chartLeave);
 function toggleChart(){
   const box = document.getElementById('chartbox');
   const shown = box.classList.toggle('shown');
-  document.getElementById('profbtn').textContent = shown ? '✕ Skrýt profil' : '📈 Výškový profil';
+  document.getElementById('profbtn').textContent = shown ? '✕ Profil' : '📈 Profil';
+  document.documentElement.style.setProperty('--chartpx', shown && isMobile() ? '130px' : '0px');
   map.invalidateSize();
   if(shown) drawChart();
 }
-window.addEventListener('resize', drawChart);
-drawChart();
+window.addEventListener('resize', ()=>{ syncSheet(); drawChart(); });
 
+// ---------- odkazy v popupech vždy do nového okna ----------
 map.on('popupopen', e=>{
   e.popup.getElement().querySelectorAll('a').forEach(a=>{ a.target='_blank'; a.rel='noopener'; });
 });
 
-// ---- GPX export ----
+// ---------- bottom sheet (mobil) ----------
+const sheet = document.getElementById('side');
+let sheetH = 0;
+function snapPoints(){ const H = window.innerHeight; return [96, Math.round(H*0.42), Math.round(H*0.92)]; }
+function setSheet(px, animate){
+  const H = window.innerHeight;
+  sheetH = Math.max(96, Math.min(px, Math.round(H*0.92)));
+  sheet.classList.toggle('dragging', !animate);
+  sheet.style.height = sheetH + 'px';
+  document.documentElement.style.setProperty('--sheetpx', sheetH + 'px');
+}
+function syncSheet(){
+  if(isMobile()){
+    if(!sheetH) sheetH = snapPoints()[1];
+    setSheet(sheetH, true);
+    document.documentElement.style.setProperty('--chartpx',
+      document.getElementById('chartbox').classList.contains('shown') ? '130px' : '0px');
+  } else {
+    sheet.style.height = ''; sheet.classList.remove('dragging');
+    sheetH = 0;
+    document.documentElement.style.setProperty('--sheetpx', '0px');
+    document.documentElement.style.setProperty('--chartpx', '0px');
+  }
+  map.invalidateSize();
+}
+(function(){
+  const grab = document.getElementById('grab');
+  let startY = 0, startH = 0, dragging = false;
+  grab.addEventListener('pointerdown', ev=>{
+    dragging = true; startY = ev.clientY; startH = sheetH;
+    grab.setPointerCapture(ev.pointerId);
+  });
+  grab.addEventListener('pointermove', ev=>{
+    if(!dragging) return;
+    setSheet(startH + (startY - ev.clientY), false);
+  });
+  const end = ()=>{
+    if(!dragging) return;
+    dragging = false;
+    const best = snapPoints().reduce((a,b)=>Math.abs(b-sheetH)<Math.abs(a-sheetH)?b:a);
+    setSheet(best, true);
+    setTimeout(()=>map.invalidateSize(), 240);
+  };
+  grab.addEventListener('pointerup', end);
+  grab.addEventListener('pointercancel', end);
+})();
+
+// ---------- init ----------
+syncSheet();
+fitAll();
+window.addEventListener('load', fitAll);
+
+// ---------- GPX export ----------
 function exportGPX(withPois){
   const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   let g = `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="bile-karpaty-trek" xmlns="http://www.topografix.com/GPX/1/1">\n`;
@@ -307,7 +461,7 @@ function exportGPX(withPois){
   if(withPois) TREK.pois.filter(p=>CATS[p.cat].on && (p.photo ? PHOTO_F.yes : PHOTO_F.no)).forEach(p=>{
     g += `<wpt lat="${p.lat}" lon="${p.lon}"><name>${esc(EMO[p.cat]+' '+cap(p.name||SUBNAMES[p.sub]||p.cat))}</name></wpt>\n`;
   });
-  g += `<trk><name>Přechod Bílých Karpat: Púchov – Vrbovce</name>\n`;
+  g += `<trk><name>Přechod Bílých Karpat: Púchov – Myjava</name>\n`;
   TREK.days.forEach(d=>{
     g += `<trkseg>` + d.latlngs.map(c=>`<trkpt lat="${c[0]}" lon="${c[1]}"/>`).join('') + `</trkseg>\n`;
   });
