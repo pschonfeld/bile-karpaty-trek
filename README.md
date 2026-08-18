@@ -1,8 +1,8 @@
 # Přechod Bílých Karpat · Púchov → Myjava žel. st.
 
 Interaktivní plánovač 4,5denního přechodu po červené hřebenovce (Cesta hrdinov SNP / E8),
-st 19. 8. – ne 23. 8. 2026. Celkem **110,4 km**, ↑3764 m / ↓3622 m (pěší turistický profil Mapy.cz, vedeno po hřebeni).
-Záložní výstup: Vrbovce žel. st. (km ~96).
+st 19. 8. – ne 23. 8. 2026. Celkem **94,2 km**, ↑3584 m / ↓3396 m. Trasa: vlastní plán z Mapy.com
+(https://mapy.com/s/jogojevesa, GPX v `data/route_user.gpx`).
 
 ## Spuštění
 Aplikace je statická – stačí naservírovat adresář:
@@ -15,14 +15,14 @@ jen některé prohlížeče blokují lokální `data.js` – server je spolehliv
 ## Etapy
 | Den | Úsek | km | ↑ / ↓ | Nocleh |
 |---|---|---|---|---|
-| St 19. 8. | Púchov žst → hřeben pod Vršatcem | 13,4 | +655/−317 | přístřešek na hřebeni (km 13,4), záloha útulna „Domček“ (km 16,4) |
-| Čt 20. 8. | → útulna za Chladným vrchem (Vršatecké bradlá, Vlárský průsmyk) | 31,7 | +1113/−1053 | útulna s ohništěm přímo na trase (km 45,1) |
-| Pá 21. 8. | → Veľký Lopeník (Starý Hrozenkov: obchod; Mikulčin vrch: restaurace) | 21,7 | +849/−565 | přístřešek pod rozhlednou (km 66,8) |
-| So 22. 8. | → přes Veľkou Javorinu (Holubyho chata) | 20,5 | +820/−1100 | přístřešek pod hřebenem (km 87,3, odbočka 1,2 km) |
-| Ne 23. 8. | → Myjava, žel. st. (kolem Vrbovců – záložní výstup) | 23,1 | +327/−587 |
+| St 19. 8. | Púchov žst → hřeben pod Vršatcem | 13,4 | +655/−317 | bouda na hřebeni (km 13,4), záloha útulna „Domček“ (km 16,4) |
+| Čt 20. 8. | → útulna za Chladným vrchem (bradlá, Chmeľová, Vlárský průsmyk) | 30,4 | +1162/−1094 | útulna s ohništěm přímo na trase (km 43,8) |
+| Pá 21. 8. | → Veľký Lopeník (Starý Hrozenkov: obchod; Mikulčin vrch: restaurace) | 21,3 | +845/−584 | přístřešek pod rozhlednou (km 65,1) |
+| So 22. 8. | → přes Veľkou Javorinu (Holubyho chata) | 19,7 | +855/−882 | přístřešek přímo na trase (km 84,8) |
+| Ne 23. 8. | → Myjava, žel. st. | 9,4 | +67/−598 | krátký dojezd na vlak |
 
 ## Data a limity
-- **Trasa**: Mapy.cz routing API, profil `foot_hiking` (preferuje značené trasy), vedená přes hřebenové body – v terénu se držte
+- **Trasa**: vlastní GPX z plánovače Mapy.com (`data/import_gpx.py` ji převádí do pipeline) – v terénu se držte
   červené značky, routing se od ní může místy drobně lišit.
 - **POI**: OpenStreetMap (Overpass), koridor ±1,2 km. Stav přístřešků a pitnost pramenů
   neověřena – berte jako pravděpodobná, ne garantovaná místa.
