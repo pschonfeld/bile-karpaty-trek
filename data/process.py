@@ -26,7 +26,12 @@ def locate(lat, lon):
     return best[2]/1000, m_between((best[0], best[1]), (lon, lat))
 
 def cat(t):
-    if t.get("amenity") == "shelter" or t.get("tourism") in ("wilderness_hut", "alpine_hut"): return "shelter"
+    if t.get("amenity") == "shelter" or t.get("tourism") in ("wilderness_hut", "alpine_hut"):
+        if (t.get("shelter_type") in ("basic_hut", "building")
+                or t.get("tourism") in ("wilderness_hut", "alpine_hut")
+                or t.get("walls") == "yes"):
+            return "hut"       # útulna / chata (uzavíratelná)
+        return "shelter"       # otevřený přístřešek
     if t.get("tourism") in ("hotel","guest_house","hostel","chalet","camp_site","motel"): return "lodging"
     if t.get("amenity") == "drinking_water" or t.get("natural") == "spring" or t.get("man_made") in ("water_well","water_tap"): return "water"
     if t.get("amenity") in ("pub","restaurant","cafe","fast_food","biergarten"): return "food"

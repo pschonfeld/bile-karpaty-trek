@@ -85,7 +85,7 @@ DAYEND = [
 ]
 for de in DAYEND:
     if "lat" not in de:
-        cands = [p for p in keep if p["cat"]=="shelter" and abs(p["km"]-de["km"]) < 0.6 and p["off"] < de["maxoff"]]
+        cands = [p for p in keep if p["cat"] in ("shelter","hut") and abs(p["km"]-de["km"]) < 0.6 and p["off"] < de["maxoff"]]
         best = min(cands, key=lambda p: (p["off"], abs(p["km"]-de["km"])))
         de["lat"], de["lon"] = best["lat"], best["lon"]
     de.pop("maxoff", None)
